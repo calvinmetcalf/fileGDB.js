@@ -1,3 +1,4 @@
+var rows = require('./rows');
 function parseHeader(buffer){
 	var data = new Uint32Array(buffer,0,40);
 	return {
@@ -141,7 +142,7 @@ function parseFields(buffer){
 	out.geometry = data.getUint8(2<<2,true);
 	out.num = data.getUint16(3<<2,true);
 	out.fields = [];
-	out.nullableFields = 0
+	out.nullableFields = 0;
 	var offset = 14;
 	var i = 0;
 	var cur;
@@ -173,6 +174,9 @@ function parseFields(buffer){
 		temp = dataHeaders[cur.type](offset,data);
 		offset = temp.offset;
 		cur.meta = temp.meta;
+		if(cur.meta.nullable){
+			out.nullableFields++;
+		}
 		out.fields[i++]=cur;
 	}
 	out.offset = offset;
@@ -193,7 +197,11 @@ function gdbtablex(buffer){
 	offset +=8;
 	var i = 0;
 	while(i<len){
-		rows[i++] = xdata.getUint32(offsetz,true);
+		rows[i++] = data.getUint32(offset,true);
 		offset += 5;
 	}
+	return rows;
 }
+module.exports= function(table,tablex){
+	return rows(table,gdbtable(table),gdbtablex(tablex));
+};
