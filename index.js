@@ -2,16 +2,9 @@ function parseHeader(buffer){
 	var data = new Uint32Array(buffer,0,40);
 	return {
 		rows:data[1],
-		fileSize=data[6],
-		fdOffset = data[8]
+		fileSize:data[6],
+		fdOffset : data[8]
 	};
-}
-function dump2(offset, data) {
-	var out = {
-		meta: {}
-	};
-	out.offset = offset + 2;
-	return out;
 }
 function get2(offset, data) {
 	var out = {
@@ -19,7 +12,7 @@ function get2(offset, data) {
 	};
 	out.meta.len = data.getUint8(offset++,true);
 	out.meta.flag = data.getUint8(offset++,true);
-	out.meta.nullable = flag&0;
+	out.meta.nullable = !(out.meta.flag&1);
 	out.offset=offset;
 	return out;
 }
@@ -29,7 +22,7 @@ function get3(offset, data) {
 	};
 	out.meta.len = data.getUint8(offset++,true);
 	out.meta.flag = data.getUint8(offset++,true);
-	out.meta.nullable = flag&0;
+	out.meta.nullable = !(out.meta.flag&1);
 	out.offset=++offset;
 	return out;
 }
@@ -47,12 +40,21 @@ var dataHeaders = [
 		offset += 4;
 		out.meta.flag = data.getUint8(offset++, true);
 		offset++; //unknown byte
-		out.meta.nullable = flag & 0;
+		out.meta.nullable = !(out.meta.flag & 1);
 		out.offset = ++offset;
 		return out;
 	},
 	get3,//datetime
-	dump2,//oid
+	function(offset, data) {
+		//oid
+		var out = {
+			meta: {}
+		};
+		offset++;
+		out.meta.nullable =false;
+		out.offset=offset;
+		return out;
+	},
 	function(offset,data){
 		//shape
 		offset +=2;
@@ -67,6 +69,7 @@ var dataHeaders = [
 			out.meta.wkt += String.fromCharCode(data.getUint8(offset++,true));
 			i++;
 		}
+		
 		var magic = data.getUint8(offset++,true);
 		out.meta.origin = [];
 		out.meta.origin.push(data.getFloat64(offset,true));
@@ -114,12 +117,22 @@ var dataHeaders = [
 		out.offset = offset;
 		return out;
 	},
-	dump2,/binary
+	function(offset, data) {
+		//binary
+		var out = {
+			meta: {}
+		};
+		offset++;
+		out.meta.flag = data.getUint8(offset++,true);
+		out.meta.nullable = !(out.meta.flag&1);
+		out.offset=offset;
+		return out;
+	},
 	null,
 	get2,//UUID
 	get2,//UUID
 	get2,//xml
-]
+];
 function parseFields(buffer){
 	var data = new DataView(buffer,40);
 	var out = {};
