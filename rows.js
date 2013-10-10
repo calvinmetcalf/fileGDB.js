@@ -1,30 +1,18 @@
-var dataTypes = [
-	function(data,offset){
-		return {
-			data: data.getUint16(offset,true),
-			offset:offset+2;
+var convertDate = require('./date');
+function parseUUID(data,offset){
+		//uuid
+		var out = "";
+		var x = 16;
+		while(x--){
+			out += data.getUint8(offset++).toString(16);
 		}
-	},
-	function(data,offset){
 		return {
-			data: data.getUint32(offset,true),
-			offset:offset+4;
-		}
-	},
-	function(data,offset){
-		return {
-			data: data.getFloat32(offset,true),
-			offset:offset+4;
-		}
-	},
-	function(data,offset){
-		return {
-			data: data.getFloat64(offset,true),
-			offset:offset+8;
-		}
-	},
-	function(data,offset,row){
-	//string
+			data: out,
+			offset:offset
+		};
+	}
+function parseText(data,offset,row){
+		//xml or string
 		var str ='';
 		var i = 0;
 		while(i<row.len){
@@ -33,43 +21,73 @@ var dataTypes = [
 		}
 		return {
 			data: str,
-			offset:offset;
-		}
+			offset:offset
+		};
+	}
+var dataTypes = [
+	function(data,offset){
+		return {
+			data: data.getUint16(offset,true),
+			offset:offset+2
+		};
 	},
+	function(data,offset){
+		return {
+			data: data.getUint32(offset,true),
+			offset:offset+4
+		};
+	},
+	function(data,offset){
+		return {
+			data: data.getFloat32(offset,true),
+			offset:offset+4
+		};
+	},
+	function(data,offset){
+		return {
+			data: data.getFloat64(offset,true),
+			offset:offset+8
+		};
+	},
+	parseText,
 	function(data,offset){
 		//date
 		return {
-			data: data.getFloat64(offset,true),
-			offset:offset+8;
-		}
+			data: convertDate(data.getFloat64(offset,true)),
+			offset:offset+8
+		};
 	},
 	function(data,offset){
 		//oid
 		return {
 			data: "",
-			offset:offset;
-		}
+			offset:offset
+		};
 	},
 	function(data,offset){
 		//shp
 		return {
 			data: "",
-			offset:offset;
-		}
+			offset:offset
+		};
 	},
-	function(data,offset){
+	function(data,offset,row){
 		//binary
-		var str ='';
+		var out =[];
 		var i = 0;
 		while(i<row.len){
-			str += String.fromCharCode.apply(false,data.getUint8(offset++));
+			out.push(data.getUint8(offset++));
 			i++;
 		}
 		return {
-			data: str,
-			offset:offset;
-		}
+			data: new ArrayBuffer(out),
+			offset:offset
+		};
 	},
+	null,
+	parseUUID,
+	parseUUID,
+	parseText
 ];
 
 module.exports = function(buffer,headers,rowOffsets){
@@ -90,13 +108,13 @@ module.exports = function(buffer,headers,rowOffsets){
 					flags.push(data.getUint8(offset++,true));
 				}
 			}
-			headers.fields.forEach(function(field,j){
+			return headers.fields.map(function(field,j){
 				if(headers.nullableFields&&field.nullable){
 					if(!flags[++nullPlace]){
 						return;
-					};
+					}
 				}
-				var temp = dataTypes[field.type](data,offset,field));
+				var temp = dataTypes[field.type](data,offset,field);
 				offset = temp.offset;
 				return temp.data;
 			});
