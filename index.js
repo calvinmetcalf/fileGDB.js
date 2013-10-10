@@ -77,25 +77,29 @@ var dataHeaders = [
 		offset += 8;
 		out.meta.origin.push(data.getFloat64(offset,true));
 		offset += 8;
+		var xyScale = data.getFloat64(offset,true);
+		offset += 8;
+		out.meta.scale = [xyScale,xyScale];
 		if(magic!==1){
 			out.meta.origin.push(data.getFloat64(offset,true));
 			offset += 8;
-			out.meta.zscale = data.getFloat64(offset,true);
+			out.meta.scale.push(data.getFloat64(offset,true));
 			offset += 8;
 			if(magic!==5){
 				out.meta.origin.push(data.getFloat64(offset,true));
 				offset += 8;
-				out.meta.mscale = data.getFloat64(offset,true);
+				out.meta.scale.push(data.getFloat64(offset,true));
 				offset += 8;
 			}
 		}
-		out.meta.xytolerance=data.getFloat64(offset,true);
+		var xytolerance=data.getFloat64(offset,true);
+		out.meta.tolerance = [xytolerance,xytolerance];
 		offset += 8;
 		if(magic!==1){
-			out.meta.ztolerance=data.getFloat64(offset,true);
+			out.meta.tolerance.push(data.getFloat64(offset,true));
 			offset += 8;
 			if(magic!==5){
-				out.meta.mtolerance=data.getFloat64(offset,true);
+				out.meta.tolerance.push(data.getFloat64(offset,true));
 				offset += 8;
 			}
 			i = 4;
@@ -176,6 +180,7 @@ function parseFields(buffer){
 		cur.meta = temp.meta;
 		if(cur.meta.nullable){
 			out.nullableFields++;
+			cur.nullable=true;
 		}
 		out.fields[i++]=cur;
 	}

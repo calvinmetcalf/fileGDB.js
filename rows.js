@@ -1,88 +1,59 @@
 var convertDate = require('./date');
-function parseUUID(data,offset){
+var parseGeometry = require('./geometry');
+var Data = require('./dataType');
+function parseUUID(data){
 		//uuid
 		var out = "";
 		var x = 16;
 		while(x--){
-			out += data.getUint8(offset++).toString(16);
+			out += data.getUint8().toString(16);
 		}
-		return {
-			data: out,
-			offset:offset
-		};
+		return out;
 	}
-function parseText(data,offset,row){
+function parseText(data){
 		//xml or string
 		var str ='';
 		var i = 0;
-		while(i<row.len){
-			str += String.fromCharCode.apply(false,data.getUint8(offset++));
+		var len = data.varuint();
+		while(i<len){
+			str += String.fromCharCode.apply(false,data.getUint8());
 			i++;
 		}
-		return {
-			data: str,
-			offset:offset
-		};
+		return str;
 	}
 var dataTypes = [
-	function(data,offset){
-		return {
-			data: data.getUint16(offset,true),
-			offset:offset+2
-		};
+	function(data){
+		return data.getUint16();
 	},
-	function(data,offset){
-		return {
-			data: data.getUint32(offset,true),
-			offset:offset+4
-		};
+	function(data){
+		return data.getUint32();
 	},
-	function(data,offset){
-		return {
-			data: data.getFloat32(offset,true),
-			offset:offset+4
-		};
+	function(data){
+		return data.getFloat32();
 	},
-	function(data,offset){
-		return {
-			data: data.getFloat64(offset,true),
-			offset:offset+8
-		};
+	function(data){
+		return data.getFloat64();
 	},
 	parseText,
-	function(data,offset){
+	function(data){
 		//date
-		return {
-			data: convertDate(data.getFloat64(offset,true)),
-			offset:offset+8
-		};
+		return convertDate(data.getFloat64());
 	},
-	function(data,offset){
+	function(data){
 		//oid
-		return {
-			data: "",
-			offset:offset
-		};
+		return;
 	},
-	function(data,offset){
-		//shp
-		return {
-			data: "",
-			offset:offset
-		};
-	},
-	function(data,offset,row){
+	parseGeometry,
+	function(data){
 		//binary
 		var out =[];
 		var i = 0;
-		while(i<row.len){
-			out.push(data.getUint8(offset++));
+		var len = data.varuint();
+		while(i<len){
+			out.push(data.getUint8());
 			i++;
 		}
-		return {
-			data: new ArrayBuffer(out),
-			offset:offset
-		};
+		return new ArrayBuffer(out);
 	},
 	null,
 	parseUUID,
@@ -99,24 +70,22 @@ module.exports = function(buffer,headers,rowOffsets){
 			}
 			var len = (new DataView(buffer,offset,4)).getUint32(0,true);
 			offset += 4;
-			var data = new DataView(buffer,offset,len);
+			var data = new Data(buffer,offset,len);
 			var flags=[];
 			var nf = headers.nullableFields;
 			var nullPlace = -1;
 			if(nf){
 				while(nf--){
-					flags.push(data.getUint8(offset++,true));
+					flags.push(data.getUint8());
 				}
 			}
-			return headers.fields.map(function(field,j){
+			return headers.fields.map(function(field){
 				if(headers.nullableFields&&field.nullable){
 					if(!flags[++nullPlace]){
 						return;
 					}
 				}
-				var temp = dataTypes[field.type](data,offset,field);
-				offset = temp.offset;
-				return temp.data;
+				return dataTypes[field.type](data,field);
 			});
 		})
 	};
