@@ -31,7 +31,6 @@ var dataHeaders = [
 		out.meta.len = data.getUint32(offset, true);
 		offset += 4;
 		out.meta.flag = data.getUint8(offset++, true);
-		offset++; //unknown byte
 		out.meta.nullable = !(out.meta.flag & 1);
 		out.offset = ++offset;
 		return out;
@@ -42,6 +41,7 @@ var dataHeaders = [
 		var out = {
 			meta: {}
 		};
+		offset++;
 		offset++;
 		out.meta.nullable =false;
 		out.offset=offset;
@@ -61,7 +61,6 @@ var dataHeaders = [
 			out.meta.wkt += String.fromCharCode(data.getUint8(offset++,true));
 			i++;
 		}
-		
 		var magic = data.getUint8(offset++,true);
 		out.meta.origin = [];
 		out.meta.origin.push(data.getFloat64(offset,true));
@@ -83,6 +82,7 @@ var dataHeaders = [
 				offset += 8;
 			}
 		}
+
 		var xytolerance=data.getFloat64(offset,true);
 		out.meta.tolerance = [xytolerance,xytolerance];
 		offset += 8;
@@ -94,21 +94,26 @@ var dataHeaders = [
 				offset += 8;
 			}
 			i = 4;
-			out.meta.extend = [];
+			out.meta.extent = [];
 			while(i--){
-					out.meta.extend.push(data.getFloat64(offset,true));
+					out.meta.extent.push(data.getFloat64(offset,true));
 				offset += 8;
 			}
 		}
-		var magic2;
+		var magic2,currentOffset;
 		if(magic>1){
-			magic2 = data.getUint32(offset+1, true);
-			if(magic2===0){
-				offset+=16;
-			}
+			currentOffset = offset;
 			offset++;
 			magic2 = data.getUint32(offset, true);
-			offset+=(magic2<<3);
+			offset+=4;
+			if(magic2===0){
+				offset = currentOffset;
+				offset+=16;
+				offset++;
+				magic2 = data.getUint32(offset, true);
+				offset+=4;
+			}
+			offset+=(magic2*8);
 		}
 		out.offset = offset;
 		return out;
@@ -143,7 +148,7 @@ function parseFields(buffer){
 	var cur;
 	var j;
 	var temp;
-	while(i<out.fields){
+	while(i<out.num){
 		cur = {};
 		cur.chars = data.getUint8(offset++,true);
 		cur.title = "";
@@ -153,19 +158,25 @@ function parseFields(buffer){
 			j++;
 			offset+=2;
 		}
+		console.log('title',cur.title);
 		cur.chars = data.getUint8(offset++,true);
 		if(cur.chars>0){
+			console.log('yes alias');
 			cur.alias="";
 			j = 0;
 			while(j<cur.chars){
-				cur.alia+=String.fromCharCode(data.getUint16(offset,true));
+				cur.alias+=String.fromCharCode(data.getUint16(offset,true));
 				j++;
 				offset+=2;
 			}
 			offset++;//skip blank byte
 		}
-		
+			
 		cur.type = data.getUint8(offset++,true);
+		console.log('type',cur.type);
+		if(!dataHeaders[cur.type]){
+			throw('fuck this');
+		}
 		temp = dataHeaders[cur.type](offset,data);
 		offset = temp.offset;
 		cur.meta = temp.meta;
@@ -178,4 +189,4 @@ function parseFields(buffer){
 	out.offset = offset;
 	return out;
 }
-module.exports = parseFields;
+module.exports = parseFields

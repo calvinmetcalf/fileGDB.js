@@ -1,6 +1,8 @@
 var convertDate = require('./date');
 var parseGeometry = require('./geometry');
 var Data = require('./dataType');
+var table = require("./table");
+var tablex = require("./tablex");
 function parseUUID(data){
 		//uuid
 		var out = "";
@@ -61,7 +63,10 @@ var dataTypes = [
 	parseText
 ];
 
-module.exports = function(buffer,headers,rowOffsets){
+module.exports = function(buffer,bufferx){
+	var headers = table(buffer);
+	console.log(headers);
+	var rowOffsets = tablex(bufferx);
 	return {
 		type:'FeatureCollection',
 		features:rowOffsets.map(function(offset,i){
@@ -79,7 +84,7 @@ module.exports = function(buffer,headers,rowOffsets){
 					flags.push(data.getUint8());
 				}
 			}
-			return headers.fields.map(function(field){
+			return headers.fields.fields.map(function(field){
 				if(headers.nullableFields&&field.nullable){
 					if(!flags[++nullPlace]){
 						return;
