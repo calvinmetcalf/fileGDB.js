@@ -1,0 +1,23 @@
+{
+  "name": "fgdb",
+  "version": "0.0.0",
+  "description": "parsing an esri file GDB IN JAVASCRIPT!",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/calvinmetcalf/fileGDB.js.git"
+  },
+  "keywords": [
+    "gis",
+    "spatial",
+    "fgdb"
+  ],
+  "author": "Calvin Metcalf",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/calvinmetcalf/fileGDB.js/issues"
+  }
+}
