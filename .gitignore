@@ -16,7 +16,4 @@ node_modules
 
 *~
 .c9revisions
-test*json
-test.js
-test.json
-data
+**/test*json
