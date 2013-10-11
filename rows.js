@@ -84,24 +84,24 @@ module.exports = function(buffer,bufferx){
 					nf-=8;
 				}
 			}
-			var geometry;
 			var out ={type:"Feature"};
-			var row = headers.fields.fields.map(function(field,i){
+			out.properties={};
+			headers.fields.fields.forEach(function(field,i){
 				if(headers.nullableFields&&field.nullable){
 					if(!flags[++nullPlace]){
 						return;
 					}
 				}
-				if(field.type === 7){
-					geometry=i;
+				var row = dataTypes[field.type](data,field);
+				if(typeof row === 'undefined'){
+					return;
 				}
-				return dataTypes[field.type](data,field);
-			}).filter(function(v){return v;});
-			if(geometry>-1){
-				out.geometry = row.splice(i,1)[0];
-				
-			}
-			out.properties = row;
+				if(field.type === 7){
+					out.geometry = row;
+				}else{
+					out.properties[field.title]= row;
+				}
+			});
 			return out;
 		})
 	};
