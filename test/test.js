@@ -2,7 +2,7 @@ var fdb = require('../lib');
 var fs = require('fs');
 var path = require('path');
 
-describe('gdb', function(){
+describe('point', function(){
 	fs.readdirSync('./test/aul.gdb').forEach(function(filePath,i){
 		if(path.extname(filePath)==='.gdbtable'){
 			it('should work',function(){
@@ -12,12 +12,12 @@ describe('gdb', function(){
 	});
 });
 
-/*while(i<9){
-	if(i===8){
-		i++;
-	}
-	console.log('on ./data/a0000000'+i+'.gdbtable');
-
-		fs.writeFileSync('./data/test'+i+'.json',JSON.stringify(fdb(fs.readFileSync('./data/a0000000'+i+'.gdbtable'),fs.readFileSync('./data/a0000000'+i+'.gdbtablx'))),{encoding:'utf8'});
-	i++;
-}*/
+describe('multi point', function(){
+	fs.readdirSync('./test/multipointtest.gdb').forEach(function(filePath,i){
+		if(path.extname(filePath)==='.gdbtable'){
+			it('should work',function(){
+				fs.writeFileSync('./test/test'+i+'.json',JSON.stringify(fdb(fs.readFileSync('./test/multipointtest.gdb/'+filePath),fs.readFileSync('./test/multipointtest.gdb/'+path.basename(filePath,'.gdbtable')+'.gdbtablx'))),{encoding:'utf8'});
+			});
+		}
+	});
+});
