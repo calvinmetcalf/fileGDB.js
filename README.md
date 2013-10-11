@@ -1,6 +1,6 @@
 fileGDB.js
 ==========
-Implementing [this](http://trac.osgeo.org/gdal/wiki/FGDBSpecification) in JavaScript
+Implementing [this amazing reverse engineering](http://trac.osgeo.org/gdal/wiki/FGDBSpecification) by [rouault](https://github.com/rouault) in JavaScript
 
 Produces valid geojson but the location values are screwy, this  seems to be an upstream  issue as the python one has the same problem.
 
