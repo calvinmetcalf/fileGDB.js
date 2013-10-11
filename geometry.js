@@ -138,14 +138,13 @@ module.exports = function(data,row){
 	}
 	var makePoint = new MakePoint(row.meta);
 	function typeFuncs(shape){
-		if(shape === 'point' || shape === 'mpoint'){
+		if(shape.base === 'point' || shape.base === 'mpoint'){
 			return typeFuncs[shape.base](shape);
 		}else{
 			return typeFuncs.complex(shape);
 		}
 	}
 	typeFuncs.point = function(shape){
-		
 		return makePoint.convert(getU(shape));
 	};
 	typeFuncs.mpoint = function(shape){
@@ -187,11 +186,59 @@ module.exports = function(data,row){
 		}
 		return lines;
 	};
-	data.varuint();//len
+	var len = data.varuint();//len
+	if(!len){
+		throw 'no length';
+	}
 	var type = data.getUint8();
-	if(!type){
-		return;
+	if(!type || !types[type]){
+		throw type+' is not a real type';
 	}
 	var shape = types[type];
-	return typeFuncs(shape);
+	var geometry = typeFuncs(shape);
+	switch(shape.base){
+		case 'point':
+			return {
+				type:"Point",
+				coordinates:geometry
+			};
+		case 'mpoint':
+			if(geometry.length === 1){
+				return {
+					type:"Point",
+					coordinates:geometry[0]
+				};
+			}else{
+				return {
+					type:"MultiPoint",
+					coordinates:geometry
+				};
+			}
+			break;
+		case 'line':
+			if(geometry.length === 1){
+				return {
+					type:"LineString",
+					coordinates:geometry[0]
+				};
+			}else{
+				return {
+					type:"MultiLineString",
+					coordinates:geometry
+				};
+			}
+			break;
+		case 'polygon':
+			if(geometry.length === 1){
+				return {
+					type:"Polygon",
+					coordinates:geometry[0]
+				};
+			}else{
+				return {
+					type:"MultiPolygon",
+					coordinates:geometry
+				};
+			}
+	}
 };

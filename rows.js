@@ -18,7 +18,7 @@ function parseText(data){
 		var i = 0;
 		var len = data.varuint();
 		while(i<len){
-			str += String.fromCharCode.apply(false,data.getUint8());
+			str += String.fromCharCode.call(false,data.getUint8());
 			i++;
 		}
 		return str;
@@ -76,21 +76,33 @@ module.exports = function(buffer,bufferx){
 			offset += 4;
 			var data = new Data(buffer,offset,len);
 			var flags=[];
-			var nf = headers.nullableFields;
+			var nf = headers.fields.nullableFields;
 			var nullPlace = -1;
 			if(nf){
-				while(nf--){
+				while(nf>0){
 					flags.push(data.getUint8());
+					nf-=8;
 				}
 			}
-			return headers.fields.fields.map(function(field){
+			var geometry;
+			var out ={type:"Feature"};
+			var row = headers.fields.fields.map(function(field,i){
 				if(headers.nullableFields&&field.nullable){
 					if(!flags[++nullPlace]){
 						return;
 					}
 				}
+				if(field.type === 7){
+					geometry=i;
+				}
 				return dataTypes[field.type](data,field);
-			});
+			}).filter(function(v){return v;});
+			if(geometry>-1){
+				out.geometry = row.splice(i,1)[0];
+				
+			}
+			out.properties = row;
+			return out;
 		})
 	};
 };

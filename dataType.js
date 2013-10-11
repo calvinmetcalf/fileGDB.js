@@ -1,5 +1,5 @@
-function Data(buffer,offset,len){
-	this.data = new DataView(buffer,offset,len);
+function Data(buffer,offset){
+	this.data = new DataView(buffer);
 	this.offset = offset;
 	this.getUint8 = function(){
 		return this.data.getUint8(this.offset++);
@@ -12,13 +12,13 @@ function Data(buffer,offset,len){
 		var b = 128;
 		while(b & 128){
 			shift += 7;
-			b = this.data.getUint8(this.offset++);
+			b = this.getUint8();
 			ret |= ((b & 127) << shift);
 		}
 		return ret;
 	};
 	this.varint = function (){
-		var b = this.data.getUint8(this.offset++);
+		var b = this.getUint8();
 		var ret = (b & 63);
 		var sign = 1;
 		if(b & 64){
@@ -30,7 +30,7 @@ function Data(buffer,offset,len){
 		var shift = -1;
 		while(b & 128){
 			shift += 7;
-			b = this.data.getUint8(this.offset++);
+			b = this.getUint8();
 			ret |= ((b & 127) << shift);
 		}
 		return ret*shift;

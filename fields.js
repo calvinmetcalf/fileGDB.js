@@ -1,20 +1,24 @@
 function get2(offset, data) {
 	var out = {
-		meta: {}
+		meta: {nullable:true}
 	};
 	out.meta.len = data.getUint8(offset++,true);
 	out.meta.flag = data.getUint8(offset++,true);
-	out.meta.nullable = !(out.meta.flag&1);
+	if((out.meta.flag&1)===0){
+		out.meta.nullable = false;
+	}
 	out.offset=offset;
 	return out;
 }
 function get3(offset, data) {
 	var out = {
-		meta: {}
+		meta: {nullable:true}
 	};
 	out.meta.len = data.getUint8(offset++,true);
 	out.meta.flag = data.getUint8(offset++,true);
-	out.meta.nullable = !(out.meta.flag&1);
+	if((out.meta.flag&1)===0){
+		out.meta.nullable = false;
+	}
 	out.offset=++offset;
 	return out;
 }
@@ -26,12 +30,14 @@ var dataHeaders = [
 	function(offset, data) {
 		//string
 		var out = {
-			meta: {}
+			meta: {nullable:true}
 		};
 		out.meta.len = data.getUint32(offset, true);
 		offset += 4;
 		out.meta.flag = data.getUint8(offset++, true);
-		out.meta.nullable = !(out.meta.flag & 1);
+		if((out.meta.flag&1)===0){
+			out.meta.nullable = false;
+		}
 		out.offset = ++offset;
 		return out;
 	},
@@ -43,7 +49,7 @@ var dataHeaders = [
 		};
 		offset++;
 		offset++;
-		out.meta.nullable =false;
+		out.meta.nullable = false;
 		out.offset=offset;
 		return out;
 	},
@@ -51,7 +57,7 @@ var dataHeaders = [
 		//shape
 		offset +=2;
 		var out = {
-			meta: {}
+			meta: {nullable:true}
 		};
 		var srsLen = data.getUint16(offset, true);
 		offset +=2;
@@ -121,11 +127,13 @@ var dataHeaders = [
 	function(offset, data) {
 		//binary
 		var out = {
-			meta: {}
+			meta: {nullable:true}
 		};
 		offset++;
 		out.meta.flag = data.getUint8(offset++,true);
-		out.meta.nullable = !(out.meta.flag&1);
+		if((out.meta.flag&1)===0){
+			out.meta.nullable = false;
+		}
 		out.offset=offset;
 		return out;
 	},
