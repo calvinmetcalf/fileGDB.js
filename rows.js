@@ -65,7 +65,6 @@ var dataTypes = [
 
 module.exports = function(buffer,bufferx){
 	var headers = table(buffer);
-	console.log(headers);
 	var rowOffsets = tablex(bufferx);
 	return {
 		type:'FeatureCollection',

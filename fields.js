@@ -158,10 +158,8 @@ function parseFields(buffer){
 			j++;
 			offset+=2;
 		}
-		console.log('title',cur.title);
 		cur.chars = data.getUint8(offset++,true);
 		if(cur.chars>0){
-			console.log('yes alias');
 			cur.alias="";
 			j = 0;
 			while(j<cur.chars){
@@ -173,7 +171,6 @@ function parseFields(buffer){
 		}
 			
 		cur.type = data.getUint8(offset++,true);
-		console.log('type',cur.type);
 		if(!dataHeaders[cur.type]){
 			throw('fuck this');
 		}
