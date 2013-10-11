@@ -33,7 +33,7 @@ function Data(buffer,offset){
 			b = this.getUint8();
 			ret |= ((b & 127) << shift);
 		}
-		return ret*shift;
+		return ret*sign;
 	};
 	this.getUint16 = function(){
 		var out = this.data.getUint16(this.offset,true);
