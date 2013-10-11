@@ -4,7 +4,7 @@
   "description": "parsing an esri file GDB IN JAVASCRIPT!",
   "main": "lib/index.js",
   "scripts": {
-    "test": "node data/test.js"
+    "test": "mocha -R nyan test/test.js"
   },
   "repository": {
     "type": "git",
@@ -19,5 +19,8 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/calvinmetcalf/fileGDB.js/issues"
+  },
+  "devDependencies": {
+    "mocha": "~1.13.0"
   }
 }
