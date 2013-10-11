@@ -99,7 +99,7 @@ function MakePoint(meta){
 	}
 	this.convert = function(point){
 		this.tmin = Math.min(point.length,this.min);
-		return point.map(addit,this);
+		return  point.map(addit,this);
 	};
 	this.reduceBegin=function(point){
 		var npoint = this.convert(point);
