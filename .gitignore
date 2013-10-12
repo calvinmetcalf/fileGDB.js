@@ -17,3 +17,5 @@ node_modules
 *~
 .c9revisions
 **/test*json
+**/pointTest*json
+**/multiPointTest*json
