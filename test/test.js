@@ -20,7 +20,7 @@ describe('gdb', function(){
 		}
 	});
 });
-/*describe('bikes', function(){
+describe('bikes', function(){
 	fs.readdirSync('./test/BikeInventory.gdb').forEach(function(filePath,i){
 		if(path.extname(filePath)==='.gdbtable'){
 			it('should work on '+filePath,function(){
@@ -39,4 +39,4 @@ describe('multi point', function(){
 		}
 	});
 });
-*/
+
