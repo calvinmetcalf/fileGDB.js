@@ -20,7 +20,7 @@ describe('gdb', function(){
 		}
 	});
 });
-describe('bikes', function(){
+/*describe('bikes', function(){
 	fs.readdirSync('./test/BikeInventory.gdb').forEach(function(filePath,i){
 		if(path.extname(filePath)==='.gdbtable'){
 			it('should work on '+filePath,function(){
@@ -28,15 +28,32 @@ describe('bikes', function(){
 			});
 		}
 	});
-});
+});*/
 
 describe('multi point', function(){
 	fs.readdirSync('./test/multipointtest.gdb').forEach(function(filePath,i){
 		if(path.extname(filePath)==='.gdbtable'){
 			it('should work on '+filePath,function(){
-				fs.writeFileSync('./test/multiPointTest'+i+'.json',JSON.stringify(fdb(fs.readFileSync('./test/multipointtest.gdb/'+filePath),fs.readFileSync('./test/multipointtest.gdb/'+path.basename(filePath,'.gdbtable')+'.gdbtablx'))),{encoding:'utf8'});
+				fs.writeFileSync('./test/result/multiPointTest'+i+'.json',JSON.stringify(fdb(fs.readFileSync('./test/multipointtest.gdb/'+filePath),fs.readFileSync('./test/multipointtest.gdb/'+path.basename(filePath,'.gdbtable')+'.gdbtablx'))),{encoding:'utf8'});
 			});
 		}
 	});
 });
-
+describe('ferry and boston', function(){
+	fs.readdirSync('./test/bostonferry.gdb').forEach(function(filePath,i){
+		if(path.extname(filePath)==='.gdbtable'){
+			it('should work on '+filePath,function(){
+				fs.writeFileSync('./test/result/bostonferry'+i+'.json',JSON.stringify(fdb(fs.readFileSync('./test/bostonferry.gdb/'+filePath),fs.readFileSync('./test/bostonferry.gdb/'+path.basename(filePath,'.gdbtable')+'.gdbtablx'))),{encoding:'utf8'});
+			});
+		}
+	});
+});
+describe('inner ring', function(){
+	fs.readdirSync('./test/innerRing.gdb').forEach(function(filePath,i){
+		if(path.extname(filePath)==='.gdbtable'){
+			it('should work on '+filePath,function(){
+				fs.writeFileSync('./test/result/innerRing'+i+'.json',JSON.stringify(fdb(fs.readFileSync('./test/innerRing.gdb/'+filePath),fs.readFileSync('./test/innerRing.gdb/'+path.basename(filePath,'.gdbtable')+'.gdbtablx'))),{encoding:'utf8'});
+			});
+		}
+	});
+});
