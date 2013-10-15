@@ -1,6 +1,6 @@
 {
   "name": "fgdb",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "parsing an esri file GDB IN JAVASCRIPT!",
   "main": "lib/index.js",
   "scripts": {
@@ -24,6 +24,7 @@
     "mocha": "~1.13.0"
   },
   "dependencies": {
-    "long": "~1.1.2"
+    "long": "~1.1.2",
+    "proj4":"1.5.0-dev.3"
   }
 }
