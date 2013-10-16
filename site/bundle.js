@@ -7734,7 +7734,7 @@ module.exports = {YlGn: {
 11: ["#a50026","#d73027","#f46d43","#fdae61","#fee08b","#ffffbf","#d9ef8b","#a6d96a","#66bd63","#1a9850","#006837"]
 }};
 },{}],58:[function(require,module,exports){
-(function(window) {
+module.exports = function(L) {
 	var HAS_HASHCHANGE = (function() {
 		var doc_mode = window.documentMode;
 		return ('onhashchange' in window) &&
@@ -7895,8 +7895,9 @@ module.exports = {YlGn: {
 	L.Map.prototype.removeHash = function() {
 		this._hash.remove();
 	};
-})(window);
+};
 },{}],59:[function(require,module,exports){
+require('./leaflet.hash')(L);
 L.Control.Layers.prototype._addItem = function(obj) {
         var label = document.createElement('label'),
             input,
@@ -7939,7 +7940,7 @@ var watercolor = L.tileLayer('http://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.
     });
     watercolor.addTo(m);
     module.exports = m;
-},{}],60:[function(require,module,exports){
+},{"./leaflet.hash":58}],60:[function(require,module,exports){
 var m = require('./mapSetup');
 var fgdb = require('../lib/index');
 var colorbrewer = require('./colorbrewer');
@@ -8081,5 +8082,5 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}]},{},[60,58])
+},{}]},{},[60])
 ;

@@ -1,3 +1,4 @@
+require('./leaflet.hash')(L);
 L.Control.Layers.prototype._addItem = function(obj) {
         var label = document.createElement('label'),
             input,
@@ -38,3 +39,5 @@ L.Control.Layers.prototype._addItem = function(obj) {
 var watercolor = L.tileLayer('http://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.jpg', {
         attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
     });
+    watercolor.addTo(m);
+    module.exports = m;

@@ -1,4 +1,6 @@
-watercolor.addTo(m);
+var m = require('./mapSetup');
+var fgdb = require('../lib/index');
+var colorbrewer = require('./colorbrewer');
 var files = {};
 var num = 0;
 var fileInput = document.getElementById("upload");
@@ -51,7 +53,7 @@ var option = {
             return L.circleMarker(latlng, {
                 opacity: 1,
                 fillOpacity: 0.7,
-                color: color(f)
+                color: color(feature)
             });
         }
 		};
