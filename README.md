@@ -42,7 +42,7 @@ todo:
 - zipped files
 - Faster
 - put it in a web worker or maybe in multiple web workers
-- Promises, promises can fit in here somehow
+- ~Promises, promises can fit in here somehow~
 
 not a high priority:
 - Anything projections beyond wgs84 all of the things.
