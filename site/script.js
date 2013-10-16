@@ -2,34 +2,15 @@ var L = require('leaflet');
 var m = require('./mapSetup')(L);
 var fgdb = require('../lib/index');
 var colorbrewer = require('./colorbrewer');
-var files = {};
-var num = 0;
 var fileInput = document.getElementById("upload");
 fileInput.addEventListener("change", function() {
-	var rawFiles = fileInput.files;
-	var len = rawFiles.length;
-	var i = 0;
-	while (i < len) {
-		if ((fileInput.files[i].name.slice(-9) === ".gdbtable" || fileInput.files[i].name.slice(-9) === ".gdbtablx") && parseInt(fileInput.files[i].name.slice(1, - 9), 16) > 8) {
-			handleFile(fileInput.files[i]);
-			num++;
-		}
-		i++;
-	}
-}, false);
+	fgdb(fileInput.files).then(function(a){
+		a.forEach(function(g){
+			L.geoJson(g, option).addTo(m);
+		});
+	});
+});
 
-function handleFile(file) {
-	var reader = new FileReader();
-	reader.onload = function() {
-		files[file.name] = reader.result;
-		num--;
-		if (!num) {
-			done();
-		}
-
-	};
-	reader.readAsArrayBuffer(file);
-}
 function color(s){
 	return colorbrewer.Spectral[11][Math.abs(JSON.stringify(s).split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)) % 11];
 }
@@ -58,14 +39,7 @@ var option = {
             });
         }
 		};
-function done() {
-	for (var key in files) {
-		if (key.slice(-1) === 'x') {
-			continue;
-		}
-		L.geoJson(fgdb(files[key], files[key.slice(0, - 1) + 'x']), option).addTo(m);
-	}
-}
+
 
 function addFunction() {
 	var div = L.DomUtil.create('form', 'bgroup');

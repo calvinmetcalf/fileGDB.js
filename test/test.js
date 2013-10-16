@@ -17,7 +17,16 @@ describe('point', function(){
 			});
 		}
 	});
+	it('should work async on ./test/aul.gdb',function(done){
+		fdb('./test/aul.gdb').then(function(l){
+			l.forEach(function(v,i){
+				fs.writeFileSync('./test/result/pointTestAsync'+i+'.geojson',JSON.stringify(v,false,4),{encoding:'utf8'});
+			});
+			done();
+		},done);
+	});
 });
+
 describe('gdb', function(){
 	fs.readdirSync('./test/GRP.gdb').forEach(function(filePath,i){
 		if(path.extname(filePath)==='.gdbtable'){
@@ -32,6 +41,14 @@ describe('gdb', function(){
 				fs.writeFileSync(outFile,JSON.stringify(result,false,4),{encoding:'utf8'});
 			});
 		}
+	});
+	it('should work async on ./test/GRP.gdb',function(done){
+		fdb('./test/GRP.gdb').then(function(l){
+			l.forEach(function(v,i){
+				fs.writeFileSync('./test/result/GRPAsync'+i+'.geojson',JSON.stringify(v,false,4),{encoding:'utf8'});
+			});
+			done();
+		},done);
 	});
 });
 /*describe('bikes', function(){
@@ -66,6 +83,14 @@ describe('multi point', function(){
 			});
 		}
 	});
+	it('should work async on ./test/multipointtest.gdb',function(done){
+		fdb('./test/multipointtest.gdb').then(function(l){
+			l.forEach(function(v,i){
+				fs.writeFileSync('./test/result/multiPointTestAsync'+i+'.geojson',JSON.stringify(v,false,4),{encoding:'utf8'});
+			});
+			done();
+		},done);
+	});
 });
 describe('ferry and boston', function(){
 	fs.readdirSync('./test/bostonferry.gdb').forEach(function(filePath,i){
@@ -82,6 +107,14 @@ describe('ferry and boston', function(){
 			});
 		}
 	});
+		it('should work async on ./test/bostonferry.gdb',function(done){
+		fdb('./test/bostonferry.gdb').then(function(l){
+			l.forEach(function(v,i){
+				fs.writeFileSync('./test/result/bostonferryAsync'+i+'.geojson',JSON.stringify(v,false,4),{encoding:'utf8'});
+			});
+			done();
+		},done);
+	});
 });
 describe('inner ring', function(){
 	fs.readdirSync('./test/innerRing.gdb').forEach(function(filePath,i){
@@ -97,5 +130,13 @@ describe('inner ring', function(){
 				fs.writeFileSync(outFile,JSON.stringify(result,false,4),{encoding:'utf8'});
 			});
 		}
+	});
+		it('should work async on ./test/innerRing.gdb',function(done){
+		fdb('./test/innerRing.gdb').then(function(l){
+			l.forEach(function(v,i){
+				fs.writeFileSync('./test/result/innerRingAsync'+i+'.geojson',JSON.stringify(v,false,4),{encoding:'utf8'});
+			});
+			done();
+		},done);
 	});
 });

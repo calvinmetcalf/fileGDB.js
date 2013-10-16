@@ -24,10 +24,15 @@
   },
   "devDependencies": {
     "mocha": "~1.13.0",
-    "leaflet": "~0.6.4"
+    "leaflet": "~0.6.4",
+    "grunt": "~0.4.1",
+    "browserify": "~2.34.1",
+    "grunt-browserify": "~1.2.9",
+    "grunt-contrib-uglify": "~0.2.4"
   },
   "dependencies": {
     "long": "~1.1.2",
-    "proj4": "1.5.0-dev.3"
+    "proj4": "1.5.0-dev.3",
+    "liar": "0.0.5"
   }
 }
