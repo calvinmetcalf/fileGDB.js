@@ -1,4 +1,5 @@
-var m = require('./mapSetup');
+var L = require('leaflet');
+var m = require('./mapSetup')(L);
 var fgdb = require('../lib/index');
 var colorbrewer = require('./colorbrewer');
 var files = {};

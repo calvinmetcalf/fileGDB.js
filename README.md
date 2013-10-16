@@ -4,7 +4,7 @@ Implementing [this amazing reverse engineering](https://github.com/rouault/dump_
 
 Produces valid geojson with coordinates converted to wgs84.
 
-if you have browserify installed build with `browserify -o bundle.js -s fgdb -e lib/index.js`
+if you have browserify installed build with `npm run build`
 
 todo:
 - Figure out how feature names are stored in the database
