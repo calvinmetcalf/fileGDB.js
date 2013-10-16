@@ -4,6 +4,17 @@ Implementing [this amazing reverse engineering](https://github.com/rouault/dump_
 
 Produces valid geojson with coordinates converted to wgs84.
 
-Ccurrently only works in node
-though that's just because I haven’t ran it through browserify.  main function takes two buffers
-one for the .table the other for the corresponding  .tablx. 
+if you have browserify installed build with `browserify -o bundle.js -s fgdb -e lib/index.js`
+
+todo:
+- Figure out how feature names are stored in the database
+- zipped files
+- Faster
+- put it in a web worker or maybe in multiple web workers
+- Promises, promises can fit in here somehow
+
+not a high priority:
+- Anything projections beyond wgs84 all of the things.
+- M coordinates
+- MultiPatch, curves or type of feature that doesn't translate to GeoJSON
+- Support for browsers that aren’t the two more recent versions
