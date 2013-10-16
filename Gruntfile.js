@@ -2,12 +2,17 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 		browserify: {
-			all: {
+			build: {
 				files: {
-					'dist/<%= pkg.name %>.js': ['lib/index.js'],
+					'dist/<%= pkg.name %>.js': ['lib/index.js']
 				},
 				options: {
 					standalone: '<%= pkg.name %>'
+				}
+			},
+			site: {
+				files: {
+					'site/bundle.js': ['site/script.js']
 				}
 			}
 		},
@@ -16,15 +21,20 @@ module.exports = function(grunt) {
 				report: 'gzip',
 				mangle: true
 			},
-			all: {
+			build: {
 				src: 'dist/<%= pkg.name %>.js',
 				dest: 'dist/<%= pkg.name %>.min.js'
+			},
+			site: {
+				src: 'site/bundle.js',
+				dest: 'site/bundle.js'
 			}
 		}
 	});
 	grunt.loadNpmTasks('grunt-browserify');
 	//grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.registerTask("build", ["browserify", "uglify"]);
+	grunt.registerTask("build", ["browserify:build", "uglify:build"]);
+	grunt.registerTask("site", ["browserify:site", "uglify:site"]);
 	grunt.registerTask("default", ["build"]);
 };

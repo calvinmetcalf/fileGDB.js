@@ -1,12 +1,10 @@
 {
   "name": "fgdb",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "parsing an esri file GDB IN JAVASCRIPT!",
   "main": "lib/index.js",
   "scripts": {
-    "test": "mocha -R nyan test/test.js",
-    "build": "browserify -o dist/fgdb.js -e lib/index.js",
-    "site": "browserify -o site/bundle.js -e site/script.js"
+    "test": "mocha -R nyan test/test.js"
   },
   "repository": {
     "type": "git",

@@ -4,7 +4,38 @@ Implementing [this amazing reverse engineering](https://github.com/rouault/dump_
 
 Produces valid geojson with coordinates converted to wgs84.
 
-if you have browserify installed build with `npm run build`
+build with `grunt`, build the site with `grunt site`
+
+pass it either 2 buffers one for the .table and the other for the .tablx files OR
+in node pass it the path to a file gdb and it will return a promise for an array of geojson of the features in the geodatabase, ie
+
+```javascript
+var fgdb = require('fgdb');
+fgdb('path/to/something.gdb').then(function(arrayOfGeoJson){
+	//do something
+},function(error){
+	//do something else
+});
+```
+
+in the broser you can do something similar but with the results for a FileList, 
+ie with this HTML
+
+```html
+<input id="upload" class="upStuff" type='file' webkitdirectory directory multiple></input>
+```
+
+then you can have this javascript
+
+```javascript
+document.getElementById("upload").addEventListener("change", function() {
+	fgdb(fileInput.files).then(function(arrayOfGeoJson){
+		//do something
+	},function(error){
+		//do something else
+	});
+});
+```
 
 todo:
 - Figure out how feature names are stored in the database
