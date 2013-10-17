@@ -36,5 +36,5 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.registerTask("build", ["browserify:build", "uglify:build"]);
 	grunt.registerTask("site", ["browserify:site", "uglify:site"]);
-	grunt.registerTask("default", ["build"]);
+	grunt.registerTask("default", ["build","site"]);
 };

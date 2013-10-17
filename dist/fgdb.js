@@ -63,7 +63,7 @@ module.exports = function(fileList) {
 	});
 
 };
-},{"./read":8,"liar":18}],2:[function(require,module,exports){
+},{"./read":8,"liar":19}],2:[function(require,module,exports){
 var Long = require('long');
 var l127 = Long.fromNumber(127,true);
 function makeLong(n){
@@ -143,7 +143,7 @@ function Data(buffer,offset){
 }
 module.exports = Data;
 
-},{"long":29}],3:[function(require,module,exports){
+},{"long":30}],3:[function(require,module,exports){
 module.exports = function(days){
 	//convert excel days since 12/30/1899 to JavaScript ms since 1/1/1970
 	var unixDays = days - 25569;//days between two dates
@@ -152,6 +152,7 @@ module.exports = function(days){
 }
 },{}],4:[function(require,module,exports){
 var proj4 = require('proj4');
+var fileHeader = require('./table');
 function get2(offset, data) {
 	var out = {
 		meta: {nullable:true}
@@ -306,7 +307,8 @@ var dataHeaders = [
 	get2,//xml
 ];
 function parseFields(buffer){
-	var data = new DataView(buffer,40);
+	var headers = fileHeader(buffer);
+	var data = new DataView(buffer,headers.fdOffset);
 	var out = {};
 	out.size = data.getUint32(0<<2,true);
 	out.version = data.getUint32(1<<2,true);
@@ -322,6 +324,7 @@ function parseFields(buffer){
 	var temp;
 	while(i<out.num){
 		cur = {};
+		//console.log('offset',offset);
 		cur.chars = data.getUint8(offset++,true);
 		while(cur.chars===0){
 			cur.chars = data.getUint8(offset++,true);
@@ -368,7 +371,7 @@ function parseFields(buffer){
 }
 module.exports = parseFields
 
-},{"proj4":45}],5:[function(require,module,exports){
+},{"./table":10,"proj4":46}],5:[function(require,module,exports){
 var Long = require('long');
 function checkIt(check,num){
 	return !Long.fromNumber(num,true).and(check);
@@ -727,7 +730,7 @@ module.exports = function(data,row){
 	return geometry;
 };
 
-},{"long":29}],6:[function(require,module,exports){
+},{"long":30}],6:[function(require,module,exports){
 var process=require("__browserify_process");var promise = require("liar");
 var buffs = require('./read');
 
@@ -742,7 +745,7 @@ module.exports= function(){
 		return require('./browserReader')(arguments[0]);
 	}
 };
-},{"./browserReader":1,"./nodeReader":7,"./read":8,"__browserify_process":17,"liar":18}],7:[function(require,module,exports){
+},{"./browserReader":1,"./nodeReader":7,"./read":8,"__browserify_process":18,"liar":19}],7:[function(require,module,exports){
 var fs = require('fs');
 var path = require('path');
 var promise = require("liar");
@@ -788,7 +791,7 @@ module.exports = function(pathString){
 		});
 	});
 };
-},{"./read":8,"fs":13,"liar":18,"path":14}],8:[function(require,module,exports){
+},{"./read":8,"fs":14,"liar":19,"path":15}],8:[function(require,module,exports){
 var process=require("__browserify_process");var rows = require('./rows');
 var util = require('./util');
 module.exports = function(table,tablex){
@@ -798,7 +801,7 @@ module.exports = function(table,tablex){
 	}
 	return rows(table,tablex);
 };
-},{"./rows":9,"./util":11,"__browserify_process":17}],9:[function(require,module,exports){
+},{"./rows":9,"./util":12,"__browserify_process":18}],9:[function(require,module,exports){
 var convertDate = require('./date');
 var parseGeometry = require('./geometry');
 var Data = require('./dataType');
@@ -955,7 +958,16 @@ module.exports = function(buffer,bufferx){
 
 
 
-},{"./dataType":2,"./date":3,"./fields":4,"./geometry":5,"./tablex":10}],10:[function(require,module,exports){
+},{"./dataType":2,"./date":3,"./fields":4,"./geometry":5,"./tablex":11}],10:[function(require,module,exports){
+module.exports = function(buffer){
+	var data = new Uint32Array(buffer,0,40);
+	return {
+		rows:data[1],
+		fileSize:data[6],
+		fdOffset : data[8]
+	};
+}
+},{}],11:[function(require,module,exports){
 module.exports = function (buffer){
 	var data = new DataView(buffer);
 	var offset = 8;
@@ -969,7 +981,7 @@ module.exports = function (buffer){
 	}
 	return rows;
 };
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 exports.toArrayBuffer = function (buffer) {
 	var len = buffer.length;
 	var view = new Uint8Array(new ArrayBuffer(len));
@@ -979,7 +991,7 @@ exports.toArrayBuffer = function (buffer) {
 	}
 	return view.buffer;
 };
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 
 
 //
@@ -1197,13 +1209,13 @@ if (typeof Object.getOwnPropertyDescriptor === 'function') {
   exports.getOwnPropertyDescriptor = valueObject;
 }
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 
 // not implemented
 // The reason for having an empty file and not throwing is to allow
 // untraditional implementation of this module.
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var process=require("__browserify_process");// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -1414,7 +1426,7 @@ exports.extname = function(path) {
   return splitPath(path)[3];
 };
 
-},{"__browserify_process":17,"_shims":12,"util":15}],15:[function(require,module,exports){
+},{"__browserify_process":18,"_shims":13,"util":16}],16:[function(require,module,exports){
 var Buffer=require("__browserify_Buffer").Buffer;// Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -1955,7 +1967,7 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-},{"__browserify_Buffer":16,"_shims":12}],16:[function(require,module,exports){
+},{"__browserify_Buffer":17,"_shims":13}],17:[function(require,module,exports){
 require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
@@ -4335,7 +4347,7 @@ function hasOwnProperty(obj, prop) {
 },{"_shims":5}]},{},[])
 ;;module.exports=require("buffer-browserify")
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -4389,7 +4401,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var promise = require('lie');
 promise.all = function(array) {
     return promise(function(fulfill, reject) {
@@ -4468,7 +4480,7 @@ promise.denodify = function(func) {
     };
 };
 module.exports = promise;
-},{"lie":19}],19:[function(require,module,exports){
+},{"lie":20}],20:[function(require,module,exports){
 var immediate = require('immediate');
 // Creates a deferred: an object with a promise and corresponding resolve/reject methods
 function Promise(resolver) {
@@ -4585,9 +4597,9 @@ function execute(callback, value, resolve, reject) {
 }
 module.exports = Promise;
 
-},{"immediate":21}],20:[function(require,module,exports){
+},{"immediate":22}],21:[function(require,module,exports){
 var global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};module.exports = typeof global === "object" && global ? global : this;
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 "use strict";
 var types = [
     require("./nextTick"),
@@ -4638,7 +4650,7 @@ retFunc.clear = function (n) {
 };
 module.exports = retFunc;
 
-},{"./messageChannel":22,"./mutation":23,"./nextTick":24,"./postMessage":25,"./realSetImmediate":26,"./stateChange":27,"./timeout":28}],22:[function(require,module,exports){
+},{"./messageChannel":23,"./mutation":24,"./nextTick":25,"./postMessage":26,"./realSetImmediate":27,"./stateChange":28,"./timeout":29}],23:[function(require,module,exports){
 "use strict";
 var globe = require("./global");
 exports.test = function () {
@@ -4652,7 +4664,7 @@ exports.install = function (func) {
         channel.port2.postMessage(0);
     };
 };
-},{"./global":20}],23:[function(require,module,exports){
+},{"./global":21}],24:[function(require,module,exports){
 "use strict";
 //based off rsvp
 //https://github.com/tildeio/rsvp.js/blob/master/lib/rsvp/async.js
@@ -4678,7 +4690,7 @@ exports.install = function (handle) {
         element.setAttribute("drainQueue", "drainQueue");
     };
 };
-},{"./global":20}],24:[function(require,module,exports){
+},{"./global":21}],25:[function(require,module,exports){
 var process=require("__browserify_process");"use strict";
 exports.test = function () {
     // Don't get fooled by e.g. browserify environments.
@@ -4688,7 +4700,7 @@ exports.test = function () {
 exports.install = function () {
     return process.nextTick;
 };
-},{"__browserify_process":17}],25:[function(require,module,exports){
+},{"__browserify_process":18}],26:[function(require,module,exports){
 "use strict";
 var globe = require("./global");
 exports.test = function () {
@@ -4726,7 +4738,7 @@ exports.install = function (func) {
         globe.postMessage(codeWord, "*");
     };
 };
-},{"./global":20}],26:[function(require,module,exports){
+},{"./global":21}],27:[function(require,module,exports){
 "use strict";
 var globe = require("./global");
 exports.test = function () {
@@ -4738,7 +4750,7 @@ exports.install = function (handle) {
     return globe.setTimeout.bind(globe,handle,0);
 };
 
-},{"./global":20}],27:[function(require,module,exports){
+},{"./global":21}],28:[function(require,module,exports){
 "use strict";
 var globe = require("./global");
 exports.test = function () {
@@ -4763,7 +4775,7 @@ exports.install = function (handle) {
         return handle;
     };
 };
-},{"./global":20}],28:[function(require,module,exports){
+},{"./global":21}],29:[function(require,module,exports){
 "use strict";
 exports.test = function () {
     return true;
@@ -4774,7 +4786,7 @@ exports.install = function (t) {
         setTimeout(t, 0);
     };
 };
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 /*
  Copyright 2013 Daniel Wirtz <dcode@dcode.io>
  Copyright 2009 The Closure Library Authors. All Rights Reserved.
@@ -5710,7 +5722,7 @@ exports.install = function (t) {
 
 })(this);
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 var mgrs = require('./mgrs');
 
 function Point(x, y, z) {
@@ -5763,7 +5775,7 @@ Point.prototype.toMGRS = function(accuracy) {
   }, accuracy);
 };
 module.exports = Point;
-},{"./mgrs":46}],31:[function(require,module,exports){
+},{"./mgrs":47}],32:[function(require,module,exports){
 var extend = require('./extend');
 var common = require('./common');
 var defs = require('./defs');
@@ -5898,7 +5910,7 @@ proj.prototype = {
 };
 module.exports = proj;
 
-},{"./common":33,"./constants/index":38,"./datum":40,"./defs":42,"./extend":43,"./projString":47,"./projections/index":56,"./wkt":76}],32:[function(require,module,exports){
+},{"./common":34,"./constants/index":39,"./datum":41,"./defs":43,"./extend":44,"./projString":48,"./projections/index":57,"./wkt":77}],33:[function(require,module,exports){
 module.exports = function(crs, denorm, point) {
   var xin = point.x,
     yin = point.y,
@@ -5951,7 +5963,7 @@ module.exports = function(crs, denorm, point) {
   return point;
 };
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 exports.PI = 3.141592653589793238; //Math.PI;
 exports.HALF_PI = 1.570796326794896619; //Math.PI*0.5;
 exports.TWO_PI = 6.283185307179586477; //Math.PI*2;
@@ -6418,7 +6430,7 @@ exports.C66 = 0.36458333333333333333;
 exports.C68 = 0.00569661458333333333;
 exports.C88 = 0.3076171875;
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 exports.wgs84 = {
   towgs84: "0,0,0",
   ellipse: "WGS84",
@@ -6494,7 +6506,7 @@ exports.gunung_segara = {
   ellipse: 'bessel',
   datumName: 'Gunung Segara Jakarta'
 };
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 exports.MERIT = {
   a: 6378137.0,
   rf: 298.257,
@@ -6710,7 +6722,7 @@ exports.sphere = {
   b: 6370997.0,
   ellipseName: "Normal Sphere (r=6370997)"
 };
-},{}],36:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 exports.greenwich = 0.0; //"0dE",
 exports.lisbon = -9.131906111111; //"9d07'54.862\"W",
 exports.paris = 2.337229166667; //"2d20'14.025\"E",
@@ -6724,7 +6736,7 @@ exports.brussels = 4.367975; //"4d22'4.71\"E",
 exports.stockholm = 18.058277777778; //"18d3'29.8\"E",
 exports.athens = 23.7163375; //"23d42'58.815\"E",
 exports.oslo = 10.722916666667; //"10d43'22.5\"E"
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 // Based on . CTABLE  structure :
   // FIXME: better to have array instead of object holding longitudes, latitudes members
   //        In the former case, one has to document index 0 is longitude and
@@ -6748,7 +6760,7 @@ exports.null = { // name of grid's file
     [0.0, 0.0] // }
   ]
 };
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 exports.PrimeMeridian = require('./PrimeMeridian');
 
 exports.Ellipsoid = require('./Ellipsoid');
@@ -6760,7 +6772,7 @@ exports.Datum.OSB36 = exports.Datum.OSGB36; //as returned from spatialreference.
 
 exports.grids = require('./grids');
 
-},{"./Datum":34,"./Ellipsoid":35,"./PrimeMeridian":36,"./grids":37}],39:[function(require,module,exports){
+},{"./Datum":35,"./Ellipsoid":36,"./PrimeMeridian":37,"./grids":38}],40:[function(require,module,exports){
 var point = require('./Point');
 var proj = require('./Proj');
 var transform = require('./transform');
@@ -6825,7 +6837,7 @@ module.exports = function(fromProj, toProj, coord) {
     return obj;
   }
 };
-},{"./Point":30,"./Proj":31,"./transform":74}],40:[function(require,module,exports){
+},{"./Point":31,"./Proj":32,"./transform":75}],41:[function(require,module,exports){
 var common = require('./common');
 var datum = function(proj) {
   if (!(this instanceof datum)) {
@@ -7223,7 +7235,7 @@ datum.prototype = {
 */
 module.exports = datum;
 
-},{"./common":33}],41:[function(require,module,exports){
+},{"./common":34}],42:[function(require,module,exports){
 var common = require('./common');
 module.exports = function(source, dest, point) {
   var wp, i, l;
@@ -7319,7 +7331,7 @@ module.exports = function(source, dest, point) {
 };
 
 
-},{"./common":33}],42:[function(require,module,exports){
+},{"./common":34}],43:[function(require,module,exports){
 var globals = require('./global');
 var parseProj = require('./projString');
 var wkt = require('./wkt');
@@ -7369,7 +7381,7 @@ function defs(name) {
 globals(defs);
 module.exports = defs;
 
-},{"./global":44,"./projString":47,"./wkt":76}],43:[function(require,module,exports){
+},{"./global":45,"./projString":48,"./wkt":77}],44:[function(require,module,exports){
 module.exports = function(destination, source) {
   destination = destination || {};
   var value, property;
@@ -7385,7 +7397,7 @@ module.exports = function(destination, source) {
   return destination;
 };
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 module.exports = function(defs) {
   defs('WGS84', "+title=WGS 84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees");
   defs('EPSG:4326', "+title=WGS 84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees");
@@ -7398,7 +7410,7 @@ module.exports = function(defs) {
   defs['EPSG:102113'] = defs['EPSG:3857'];
 };
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 var proj4 = require('./core');
 proj4.defaultDatum = 'WGS84'; //default datum
 proj4.Proj = require('./Proj');
@@ -7409,7 +7421,7 @@ proj4.transform = require('./transform');
 proj4.mgrs = require('./mgrs');
 proj4.version = require('./version');
 module.exports = proj4;
-},{"./Point":30,"./Proj":31,"./core":39,"./defs":42,"./mgrs":46,"./transform":74,"./version":75}],46:[function(require,module,exports){
+},{"./Point":31,"./Proj":32,"./core":40,"./defs":43,"./mgrs":47,"./transform":75,"./version":76}],47:[function(require,module,exports){
 /*
 Portions of this software are based on a port of components from the OpenMap
 com.bbn.openmap.proj.coords Java package. An initial port was initially created
@@ -8299,7 +8311,7 @@ function getMinNorthing(zoneLetter) {
 
 }
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 var common = require('./common');
 var constants = require('./constants/index');
 module.exports = function(defData) {
@@ -8417,7 +8429,7 @@ module.exports = function(defData) {
   return self;
 };
 
-},{"./common":33,"./constants/index":38}],48:[function(require,module,exports){
+},{"./common":34,"./constants/index":39}],49:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
 
@@ -8536,7 +8548,7 @@ exports.phi1z = function(eccent, qs) {
 };
 exports.names = ["Albers_Conic_Equal_Area", "Albers", "aea"];
 
-},{"../common":33}],49:[function(require,module,exports){
+},{"../common":34}],50:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
   this.sin_p12 = Math.sin(this.lat0);
@@ -8725,7 +8737,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Azimuthal_Equidistant", "aeqd"];
 
-},{"../common":33}],50:[function(require,module,exports){
+},{"../common":34}],51:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
   if (!this.sphere) {
@@ -8819,7 +8831,7 @@ exports.inverse = function(p) {
 
 };
 exports.names = ["Cassini", "Cassini_Soldner", "cass"];
-},{"../common":33}],51:[function(require,module,exports){
+},{"../common":34}],52:[function(require,module,exports){
 var common = require('../common');
 /*
   reference:  
@@ -8881,7 +8893,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["cea"];
 
-},{"../common":33}],52:[function(require,module,exports){
+},{"../common":34}],53:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
 
@@ -8923,7 +8935,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Equirectangular", "Equidistant_Cylindrical", "eqc"];
 
-},{"../common":33}],53:[function(require,module,exports){
+},{"../common":34}],54:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
 
@@ -9027,7 +9039,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Equidistant_Conic", "eqdc"];
 
-},{"../common":33}],54:[function(require,module,exports){
+},{"../common":34}],55:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
   var sphi = Math.sin(this.lat0);
@@ -9071,7 +9083,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["gauss"];
 
-},{"../common":33}],55:[function(require,module,exports){
+},{"../common":34}],56:[function(require,module,exports){
 var common = require('../common');
 /*
   reference:
@@ -9169,7 +9181,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["gnom"];
 
-},{"../common":33}],56:[function(require,module,exports){
+},{"../common":34}],57:[function(require,module,exports){
 var projs = [
   require('./tmerc'),
   require('./utm'),
@@ -9227,7 +9239,7 @@ exports.start = function() {
   projs.forEach(add);
 };
 
-},{"./aea":48,"./aeqd":49,"./cass":50,"./cea":51,"./eqc":52,"./eqdc":53,"./gnom":55,"./krovak":57,"./laea":58,"./lcc":59,"./longlat":60,"./merc":61,"./mill":62,"./moll":63,"./nzmg":64,"./omerc":65,"./poly":66,"./sinu":67,"./somerc":68,"./stere":69,"./sterea":70,"./tmerc":71,"./utm":72,"./vandg":73}],57:[function(require,module,exports){
+},{"./aea":49,"./aeqd":50,"./cass":51,"./cea":52,"./eqc":53,"./eqdc":54,"./gnom":56,"./krovak":58,"./laea":59,"./lcc":60,"./longlat":61,"./merc":62,"./mill":63,"./moll":64,"./nzmg":65,"./omerc":66,"./poly":67,"./sinu":68,"./somerc":69,"./stere":70,"./sterea":71,"./tmerc":72,"./utm":73,"./vandg":74}],58:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
   this.a = 6377397.155;
@@ -9327,7 +9339,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Krovak", "krovak"];
 
-},{"../common":33}],58:[function(require,module,exports){
+},{"../common":34}],59:[function(require,module,exports){
 var common = require('../common');
 /*
   reference
@@ -9613,7 +9625,7 @@ exports.authlat = function(beta, APA) {
 };
 exports.names = ["Lambert Azimuthal Equal Area", "Lambert_Azimuthal_Equal_Area", "laea"];
 
-},{"../common":33}],59:[function(require,module,exports){
+},{"../common":34}],60:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
 
@@ -9743,7 +9755,7 @@ exports.inverse = function(p) {
 
 exports.names = ["Lambert Tangential Conformal Conic Projection", "Lambert_Conformal_Conic", "Lambert_Conformal_Conic_2SP", "lcc"];
 
-},{"../common":33}],60:[function(require,module,exports){
+},{"../common":34}],61:[function(require,module,exports){
 exports.init = function() {
   //no-op for longlat
 };
@@ -9755,7 +9767,7 @@ exports.forward = identity;
 exports.inverse = identity;
 exports.names = ["longlat", "identity"];
 
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
   var con = this.b / this.a;
@@ -9841,7 +9853,7 @@ exports.inverse = function(p) {
 
 exports.names = ["Mercator", "Popular Visualisation Pseudo Mercator", "Mercator_1SP", "Mercator_Auxiliary_Sphere", "merc"];
 
-},{"../common":33}],62:[function(require,module,exports){
+},{"../common":34}],63:[function(require,module,exports){
 var common = require('../common');
 /*
   reference
@@ -9888,7 +9900,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Miller_Cylindrical", "mill"];
 
-},{"../common":33}],63:[function(require,module,exports){
+},{"../common":34}],64:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {};
 
@@ -9966,7 +9978,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Mollweide", "moll"];
 
-},{"../common":33}],64:[function(require,module,exports){
+},{"../common":34}],65:[function(require,module,exports){
 var common = require('../common');
 /*
   reference
@@ -10186,7 +10198,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["New_Zealand_Map_Grid", "nzmg"];
-},{"../common":33}],65:[function(require,module,exports){
+},{"../common":34}],66:[function(require,module,exports){
 var common = require('../common');
 
 
@@ -10351,7 +10363,7 @@ exports.inverse = function(p) {
 };
 
 exports.names = ["Hotine_Oblique_Mercator", "Hotine Oblique Mercator", "Hotine_Oblique_Mercator_Azimuth_Natural_Origin", "Hotine_Oblique_Mercator_Azimuth_Center", "omerc"];
-},{"../common":33}],66:[function(require,module,exports){
+},{"../common":34}],67:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
   /* Place parameters in static storage for common use
@@ -10471,7 +10483,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["Polyconic", "poly"];
-},{"../common":33}],67:[function(require,module,exports){
+},{"../common":34}],68:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
   /* Place parameters in static storage for common use
@@ -10570,7 +10582,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["Sinusoidal", "sinu"];
-},{"../common":33}],68:[function(require,module,exports){
+},{"../common":34}],69:[function(require,module,exports){
 /*
   references:
     Formules et constantes pour le Calcul pour la
@@ -10652,7 +10664,7 @@ exports.inverse = function(p) {
 
 exports.names = ["somerc"];
 
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 var common = require('../common');
 exports.ssfn_ = function(phit, sinphi, eccen) {
   sinphi *= eccen;
@@ -10813,7 +10825,7 @@ exports.inverse = function(p) {
 
 };
 exports.names = ["stere"];
-},{"../common":33}],70:[function(require,module,exports){
+},{"../common":34}],71:[function(require,module,exports){
 var common = require('../common');
 var gauss = require('./gauss');
 exports.init = function() {
@@ -10872,7 +10884,7 @@ exports.inverse = function(p) {
 
 exports.names = ["Stereographic_North_Pole", "Oblique_Stereographic", "Polar_Stereographic", "sterea","Oblique Stereographic Alternative"];
 
-},{"../common":33,"./gauss":54}],71:[function(require,module,exports){
+},{"../common":34,"./gauss":55}],72:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
   this.e0 = common.e0fn(this.es);
@@ -10999,7 +11011,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Transverse_Mercator", "Transverse Mercator", "tmerc"];
 
-},{"../common":33}],72:[function(require,module,exports){
+},{"../common":34}],73:[function(require,module,exports){
 var common = require('../common');
 var tmerc = require('./tmerc');
 exports.dependsOn = 'tmerc';
@@ -11019,7 +11031,7 @@ exports.init = function() {
 };
 exports.names = ["Universal Transverse Mercator System", "utm"];
 
-},{"../common":33,"./tmerc":71}],73:[function(require,module,exports){
+},{"../common":34,"./tmerc":72}],74:[function(require,module,exports){
 var common = require('../common');
 
 /* Initialize the Van Der Grinten projection
@@ -11138,7 +11150,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["Van_der_Grinten_I", "VanDerGrinten", "vandg"];
-},{"../common":33}],74:[function(require,module,exports){
+},{"../common":34}],75:[function(require,module,exports){
 var common = require('./common');
 var datum_transform = require('./datum_transform');
 var adjust_axis = require('./adjust_axis');
@@ -11205,9 +11217,9 @@ module.exports = function transform(source, dest, point) {
 
   return point;
 };
-},{"./Proj":31,"./adjust_axis":32,"./common":33,"./datum_transform":41}],75:[function(require,module,exports){
+},{"./Proj":32,"./adjust_axis":33,"./common":34,"./datum_transform":42}],76:[function(require,module,exports){
 module.exports = '1.5.0-dev.3';
-},{}],76:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 var common = require('./common');
 var extend = require('./extend');
 
@@ -11415,7 +11427,7 @@ module.exports = function(wkt, self) {
   return extend(self, obj.output);
 };
 
-},{"./common":33,"./extend":43}]},{},[6])
+},{"./common":34,"./extend":44}]},{},[6])
 (6)
 });
 ;

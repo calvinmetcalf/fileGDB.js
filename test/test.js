@@ -131,3 +131,25 @@ describe('inner ring', function(){
 		},done);
 	});
 });
+describe('fuel', function(){
+	fs.readdirSync('./test/fuel.gdb').forEach(function(filePath,i){
+		if(path.extname(filePath)==='.gdbtable'){
+			it('should work on '+filePath,function(){
+				var outFile;
+				var result = fdb(fs.readFileSync('./test/fuel.gdb/'+filePath),fs.readFileSync('./test/fuel.gdb/'+path.basename(filePath,'.gdbtable')+'.gdbtablx'));
+				if(result.type === 'FeatureCollection'){
+					outFile = './test/result/fuel'+path.basename(filePath,'.gdbtable')+'.geojson';
+				}else{
+					outFile = './test/result/fuel'+path.basename(filePath,'.gdbtable')+'.json';
+				}
+				fs.writeFileSync(outFile,JSON.stringify(result,false,4),{encoding:'utf8'});
+			});
+		}
+	});
+		it('should work async on ./test/fuel.gdb',function(done){
+		fdb('./test/fuel.gdb').then(function(l){
+			fs.writeFileSync('./test/result/innerRingAsync.json',JSON.stringify(l,false,4),{encoding:'utf8'});
+			done();
+		},done);
+	});
+});
