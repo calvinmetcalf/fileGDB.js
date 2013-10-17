@@ -4,13 +4,13 @@ var fgdb = require('../lib/index');
 var colorbrewer = require('./colorbrewer');
 var fileInput = document.getElementById("upload");
 fileInput.addEventListener("change", function() {
-	fgdb(fileInput.files).then(function(a){
-		a.forEach(function(g){
-			L.geoJson(g, option).addTo(m);
-		});
+	fgdb(fileInput.files).then(function(layers){
+		for(var key in layers){
+			lc.addOverlay(L.geoJson(layers[key], option).addTo(m),key);
+		}
 	});
 });
-
+var lc = L.control.layers({},{},{collapsed:false}).addTo(m);
 function color(s){
 	return colorbrewer.Spectral[11][Math.abs(JSON.stringify(s).split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)) % 11];
 }

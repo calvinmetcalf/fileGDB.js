@@ -7,11 +7,11 @@ Produces valid geojson with coordinates converted to wgs84.
 build with `grunt`, build the site with `grunt site`
 
 pass it either 2 buffers one for the .table and the other for the .tablx files OR
-in node pass it the path to a file gdb and it will return a promise for an array of geojson of the features in the geodatabase, ie
+in node pass it the path to a file gdb and it will return a promise for an object whose keys are names and the values are geojson ie
 
 ```javascript
 var fgdb = require('fgdb');
-fgdb('path/to/something.gdb').then(function(arrayOfGeoJson){
+fgdb('path/to/something.gdb').then(function(objectOfGeojson){
 	//do something
 },function(error){
 	//do something else
@@ -29,7 +29,7 @@ then you can have this javascript
 
 ```javascript
 document.getElementById("upload").addEventListener("change", function() {
-	fgdb(fileInput.files).then(function(arrayOfGeoJson){
+	fgdb(fileInput.files).then(function(objectOfGeojson){
 		//do something
 	},function(error){
 		//do something else
@@ -38,7 +38,7 @@ document.getElementById("upload").addEventListener("change", function() {
 ```
 
 todo:
-- Figure out how feature names are stored in the database
+- ~~Figure out how feature names are stored in the database~~
 - zipped files
 - Faster
 - put it in a web worker or maybe in multiple web workers
