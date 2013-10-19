@@ -27,10 +27,10 @@ module.exports = function(fileList) {
 		var i = 0;
 		var len = fileList.length;
 		while (i < len) {
-				if (fileList[i].name.slice(-9) === ".gdbtable") {
+				if (fileList[i].name.slice(-9) === ".gdbtable"&&(parseInt(fileList[i].name.slice(1,-9),16)===1||parseInt(fileList[i].name.slice(1,-9),16)>8)){
 					tableA[parseInt(fileList[i].name.slice(1, - 9), 16)] = fileList[i];
 				}
-				else if (fileList[i].name.slice(-9) === ".gdbtablx") {
+				else if (fileList[i].name.slice(-9) === ".gdbtablx"&&(parseInt(fileList[i].name.slice(1,-9),16)===1||parseInt(fileList[i].name.slice(1,-9),16)>8)) {
 					tablxA[parseInt(fileList[i].name.slice(1, - 9), 16)] = fileList[i];
 				}
 			i++;
@@ -44,9 +44,10 @@ module.exports = function(fileList) {
 		}
 		readFile(0).then(function(files) {
 			var out = {};
-			files.forEach(function(name, i) {
+			var i = 1;
+			files.forEach(function(name) {
 				if (name.Name.slice(0, 4) !== 'GDB_') {
-					out[name.Name] = i-1;
+					out[name.Name] = i++;
 				}
 			});
 			return out;
@@ -755,16 +756,18 @@ var read = require('./read');
 function getNames(pathString){
 	return readDir(pathString).then(function(rawPaths){
 		var paths = rawPaths.filter(function(a){
-			return a.slice(-9)==='.gdbtable';
+			return a.slice(-9)==='.gdbtable'&&parseInt(a.slice(1,-9),16)>8;
 		});
 		paths.sort(function(a,b){
 			return parseInt(a.slice(1,-9),16)-parseInt(b.slice(1,-9),16);
 		});
 		return readFiles(path.join(pathString,'a00000001.gdbtable')).then(function(files){
 			var out = {};
-			files.forEach(function(name,i){
-					var fileName = paths[i-1];
+			var i = 0;
+			files.filter(function(name){
+					var fileName;
 					if(name.Name.slice(0,4)!=='GDB_'){
+						fileName= paths[i++];
 						out[name.Name]=fileName;
 					}
 				});
@@ -3382,16 +3385,19 @@ function Point(x, y, z) {
   if (!(this instanceof Point)) {
     return new Point(x, y, z);
   }
-  if (typeof x === 'object') {
+  if (Array.isArray(x)) {
     this.x = x[0];
     this.y = x[1];
     this.z = x[2] || 0.0;
-  }
-  else if (typeof x === 'string' && typeof y === 'undefined') {
+  }else if(typeof x === 'object'){
+    this.x = x.x;
+    this.y = x.y;
+    this.z = x.z || 0.0;
+  } else if (typeof x === 'string' && typeof y === 'undefined') {
     var coords = x.split(',');
-    this.x = parseFloat(coords[0]);
-    this.y = parseFloat(coords[1]);
-    this.z = parseFloat(coords[2]) || 0.0;
+    this.x = parseFloat(coords[0], 10);
+    this.y = parseFloat(coords[1], 10);
+    this.z = parseFloat(coords[2], 10) || 0.0;
   }
   else {
     this.x = x;
@@ -3401,19 +3407,26 @@ function Point(x, y, z) {
   this.clone = function() {
     return new Point(this.x, this.y, this.z);
   };
-  this.toString = function() {
-    return ("x=" + this.x + ",y=" + this.y);
+  this.toArray = function(){
+    if(this.z){
+      return [this.x,this.y, this.z];
+    }else{
+      return [this.x,this.y];
+    }
   };
-  /** 
-   * APIMethod: toShortString
-   * Return a short string version of the point.
-   *
-   * Return:
-   * {String} Shortened String representation of ..Point object. 
-   *         (ex. <i>"5, 42"</i>)
-   */
+  this.toString = function() {
+    if(this.z){
+      return "x=" + this.x + ",y=" + this.y + ",z="+this.z;
+    }else{
+      return "x=" + this.x + ",y=" + this.y;
+    }
+  };
   this.toShortString = function() {
-    return (this.x + ", " + this.y);
+    if(this.z){
+      return this.x + "," + this.y+ "," + this.z;
+    }else{
+      return this.x + "," + this.y;
+    }
   };
 }
 
@@ -3438,9 +3451,9 @@ var projections = require('./projections/index');
 var wkt = require('./wkt');
 var projStr = require('./projString');
 
-function proj(srsCode) {
-  if (!(this instanceof proj)) {
-    return new proj(srsCode);
+function Projection(srsCode) {
+  if (!(this instanceof Projection)) {
+    return new Projection(srsCode);
   }
   this.srsCodeInput = srsCode;
   this.x0 = 0;
@@ -3471,16 +3484,16 @@ function proj(srsCode) {
 
   this.initTransforms(this.projName);
 }
-proj.projections = projections;
-proj.projections.start();
-proj.prototype = {
+Projection.projections = projections;
+Projection.projections.start();
+Projection.prototype = {
   /**
    * Function: initTransforms
    *    Finalize the initialization of the Proj object
    *
    */
   initTransforms: function(projName) {
-    var ourProj = proj.projections.get(projName);
+    var ourProj = Projection.projections.get(projName);
     if (ourProj) {
       extend(this, ourProj);
       this.init();
@@ -3561,7 +3574,7 @@ proj.prototype = {
     self.datum = datum(self);
   }
 };
-module.exports = proj;
+module.exports = Projection;
 
 },{"./common":33,"./constants/index":38,"./datum":40,"./defs":42,"./extend":43,"./projString":47,"./projections/index":56,"./wkt":76}],32:[function(require,module,exports){
 module.exports = function(crs, denorm, point) {
@@ -4456,7 +4469,7 @@ function checkProj(item) {
   }
   return proj(item);
 }
-module.exports = function(fromProj, toProj, coord) {
+function proj4(fromProj, toProj, coord) {
   fromProj = checkProj(fromProj);
   var single = false;
   var obj;
@@ -4489,7 +4502,8 @@ module.exports = function(fromProj, toProj, coord) {
     }
     return obj;
   }
-};
+}
+module.exports = proj4;
 },{"./Point":30,"./Proj":31,"./transform":74}],40:[function(require,module,exports){
 var common = require('./common');
 var datum = function(proj) {
@@ -8871,7 +8885,7 @@ module.exports = function transform(source, dest, point) {
   return point;
 };
 },{"./Proj":31,"./adjust_axis":32,"./common":33,"./datum_transform":41}],75:[function(require,module,exports){
-module.exports = '1.5.0-dev.3';
+module.exports = '1.5.0-dev.4';
 },{}],76:[function(require,module,exports){
 var common = require('./common');
 var extend = require('./extend');
