@@ -27,7 +27,8 @@ module.exports = function(grunt) {
 		uglify: {
 			options: {
 				report: 'gzip',
-				mangle: true
+				mangle: true,
+				banner:'/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>\nhttps://github.com/calvinmetcalf/fileGDB.js*/\n'
 			},
 			build: {
 				src: 'dist/<%= pkg.name %>.js',
