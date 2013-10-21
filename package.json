@@ -26,7 +26,9 @@
     "grunt": "~0.4.1",
     "browserify": "~2.34.1",
     "grunt-browserify": "~1.2.9",
-    "grunt-contrib-uglify": "~0.2.4"
+    "grunt-contrib-uglify": "~0.2.4",
+    "geojsonhint": "~0.1.5",
+    "geojson-assert": "0.0.2"
   },
   "dependencies": {
     "long": "~1.1.2",
