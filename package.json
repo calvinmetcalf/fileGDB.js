@@ -1,6 +1,6 @@
 {
   "name": "fgdb",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "parsing an esri file GDB IN JAVASCRIPT!",
   "main": "lib/index.js",
   "scripts": {
@@ -27,7 +27,6 @@
     "browserify": "~2.34.1",
     "grunt-browserify": "~1.2.9",
     "grunt-contrib-uglify": "~0.2.4",
-    "geojsonhint": "~0.1.5",
     "geojson-assert": "0.0.2"
   },
   "dependencies": {

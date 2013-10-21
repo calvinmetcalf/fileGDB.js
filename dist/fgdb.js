@@ -1,5 +1,7 @@
 !function(e){"object"==typeof exports?module.exports=e():"function"==typeof define&&define.amd?define(e):"undefined"!=typeof window?window.fgdb=e():"undefined"!=typeof global?global.fgdb=e():"undefined"!=typeof self&&(self.fgdb=e())}(function(){var define,module,exports;
-return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({"./nodeReader":[function(require,module,exports){
+module.exports=require('d7QYBZ');
+},{}],"d7QYBZ":[function(require,module,exports){
 var promise = require("liar");
 var read = require('./read');
 
@@ -64,7 +66,7 @@ module.exports = function(fileList) {
 	});
 
 };
-},{"./read":8,"liar":18}],2:[function(require,module,exports){
+},{"./read":8,"liar":14}],3:[function(require,module,exports){
 var Long = require('long');
 var l127 = Long.fromNumber(127,true);
 function makeLong(n){
@@ -144,14 +146,14 @@ function Data(buffer,offset){
 }
 module.exports = Data;
 
-},{"long":29}],3:[function(require,module,exports){
+},{"long":25}],4:[function(require,module,exports){
 module.exports = function(days){
 	//convert excel days since 12/30/1899 to JavaScript ms since 1/1/1970
 	var unixDays = days - 25569;//days between two dates
 	var ms = unixDays*864e5;//milliseconds per day
 	return new Date(ms);
 }
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 var proj4 = require('proj4');
 var fileHeader = require('./table');
 function get2(offset, data) {
@@ -372,7 +374,7 @@ function parseFields(buffer){
 }
 module.exports = parseFields
 
-},{"./table":10,"proj4":45}],5:[function(require,module,exports){
+},{"./table":10,"proj4":41}],6:[function(require,module,exports){
 var Long = require('long');
 function checkIt(check,num){
 	return !Long.fromNumber(num,true).and(check);
@@ -731,70 +733,22 @@ module.exports = function(data,row){
 	return geometry;
 };
 
-},{"long":29}],6:[function(require,module,exports){
+},{"long":25}],7:[function(require,module,exports){
 var process=require("__browserify_process");var promise = require("liar");
 var buffs = require('./read');
-
+var reader = require('./nodeReader');
 module.exports= function(){
 	if(arguments.length === 2){
 		return buffs(arguments[0],arguments[1]);
 	}
 	if(typeof arguments[0] === 'string' &&!process.browser){
-		return require('./nodeReader')(arguments[0]);
+		return reader(arguments[0]);
 	}
 	if(process.browser&&arguments[0].toString()==="[object FileList]"){
-		return require('./browserReader')(arguments[0]);
+		return reader(arguments[0]);
 	}
 };
-},{"./browserReader":1,"./nodeReader":7,"./read":8,"__browserify_process":17,"liar":18}],7:[function(require,module,exports){
-var fs = require('fs');
-var path = require('path');
-var promise = require("liar");
-var readFile = promise.denodify(fs.readFile);
-var readDir = promise.denodify(fs.readdir);
-var read = require('./read');
-function getNames(pathString){
-	return readDir(pathString).then(function(rawPaths){
-		var paths = rawPaths.filter(function(a){
-			return a.slice(-9)==='.gdbtable'&&parseInt(a.slice(1,-9),16)>8;
-		});
-		paths.sort(function(a,b){
-			return parseInt(a.slice(1,-9),16)-parseInt(b.slice(1,-9),16);
-		});
-		return readFiles(path.join(pathString,'a00000001.gdbtable')).then(function(files){
-			var out = {};
-			var i = 0;
-			files.filter(function(name){
-					var fileName;
-					if(name.Name.slice(0,4)!=='GDB_'){
-						fileName= paths[i++];
-						out[name.Name]=fileName;
-					}
-				});
-			return out;
-		});
-	});
-}
-function readFiles(file){
-	return promise(function(yes,no){
-		yes(promise.map([file,file.slice(0,-1)+'x'],readFile).then(function(buffers){
-			return read(buffers[0],buffers[1]);
-		}));
-	});
-}
-module.exports = function(pathString){
-	return getNames(pathString).then(function(names){
-		var out = {};
-		return promise.map(Object.keys(names),function(key){
-				return readFiles(path.join(pathString,names[key])).then(function(v){
-					out[key]=v;
-				});
-		}).then(function(a){
-			return out;
-		});
-	});
-};
-},{"./read":8,"fs":14,"liar":18,"path":15}],8:[function(require,module,exports){
+},{"./nodeReader":"d7QYBZ","./read":8,"__browserify_process":13,"liar":14}],8:[function(require,module,exports){
 var process=require("__browserify_process");var rows = require('./rows');
 var util = require('./util');
 module.exports = function(table,tablex){
@@ -804,7 +758,7 @@ module.exports = function(table,tablex){
 	}
 	return rows(table,tablex);
 };
-},{"./rows":9,"./util":12,"__browserify_process":17}],9:[function(require,module,exports){
+},{"./rows":9,"./util":12,"__browserify_process":13}],9:[function(require,module,exports){
 var convertDate = require('./date');
 var parseGeometry = require('./geometry');
 var Data = require('./dataType');
@@ -961,7 +915,7 @@ module.exports = function(buffer,bufferx){
 
 
 
-},{"./dataType":2,"./date":3,"./fields":4,"./geometry":5,"./tablex":11}],10:[function(require,module,exports){
+},{"./dataType":3,"./date":4,"./fields":5,"./geometry":6,"./tablex":11}],10:[function(require,module,exports){
 module.exports = function(buffer){
 	var data = new Uint32Array(buffer,0,40);
 	return {
@@ -995,986 +949,6 @@ exports.toArrayBuffer = function (buffer) {
 	return view.buffer;
 };
 },{}],13:[function(require,module,exports){
-
-
-//
-// The shims in this file are not fully implemented shims for the ES5
-// features, but do work for the particular usecases there is in
-// the other modules.
-//
-
-var toString = Object.prototype.toString;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-
-// Array.isArray is supported in IE9
-function isArray(xs) {
-  return toString.call(xs) === '[object Array]';
-}
-exports.isArray = typeof Array.isArray === 'function' ? Array.isArray : isArray;
-
-// Array.prototype.indexOf is supported in IE9
-exports.indexOf = function indexOf(xs, x) {
-  if (xs.indexOf) return xs.indexOf(x);
-  for (var i = 0; i < xs.length; i++) {
-    if (x === xs[i]) return i;
-  }
-  return -1;
-};
-
-// Array.prototype.filter is supported in IE9
-exports.filter = function filter(xs, fn) {
-  if (xs.filter) return xs.filter(fn);
-  var res = [];
-  for (var i = 0; i < xs.length; i++) {
-    if (fn(xs[i], i, xs)) res.push(xs[i]);
-  }
-  return res;
-};
-
-// Array.prototype.forEach is supported in IE9
-exports.forEach = function forEach(xs, fn, self) {
-  if (xs.forEach) return xs.forEach(fn, self);
-  for (var i = 0; i < xs.length; i++) {
-    fn.call(self, xs[i], i, xs);
-  }
-};
-
-// Array.prototype.map is supported in IE9
-exports.map = function map(xs, fn) {
-  if (xs.map) return xs.map(fn);
-  var out = new Array(xs.length);
-  for (var i = 0; i < xs.length; i++) {
-    out[i] = fn(xs[i], i, xs);
-  }
-  return out;
-};
-
-// Array.prototype.reduce is supported in IE9
-exports.reduce = function reduce(array, callback, opt_initialValue) {
-  if (array.reduce) return array.reduce(callback, opt_initialValue);
-  var value, isValueSet = false;
-
-  if (2 < arguments.length) {
-    value = opt_initialValue;
-    isValueSet = true;
-  }
-  for (var i = 0, l = array.length; l > i; ++i) {
-    if (array.hasOwnProperty(i)) {
-      if (isValueSet) {
-        value = callback(value, array[i], i, array);
-      }
-      else {
-        value = array[i];
-        isValueSet = true;
-      }
-    }
-  }
-
-  return value;
-};
-
-// String.prototype.substr - negative index don't work in IE8
-if ('ab'.substr(-1) !== 'b') {
-  exports.substr = function (str, start, length) {
-    // did we get a negative start, calculate how much it is from the beginning of the string
-    if (start < 0) start = str.length + start;
-
-    // call the original function
-    return str.substr(start, length);
-  };
-} else {
-  exports.substr = function (str, start, length) {
-    return str.substr(start, length);
-  };
-}
-
-// String.prototype.trim is supported in IE9
-exports.trim = function (str) {
-  if (str.trim) return str.trim();
-  return str.replace(/^\s+|\s+$/g, '');
-};
-
-// Function.prototype.bind is supported in IE9
-exports.bind = function () {
-  var args = Array.prototype.slice.call(arguments);
-  var fn = args.shift();
-  if (fn.bind) return fn.bind.apply(fn, args);
-  var self = args.shift();
-  return function () {
-    fn.apply(self, args.concat([Array.prototype.slice.call(arguments)]));
-  };
-};
-
-// Object.create is supported in IE9
-function create(prototype, properties) {
-  var object;
-  if (prototype === null) {
-    object = { '__proto__' : null };
-  }
-  else {
-    if (typeof prototype !== 'object') {
-      throw new TypeError(
-        'typeof prototype[' + (typeof prototype) + '] != \'object\''
-      );
-    }
-    var Type = function () {};
-    Type.prototype = prototype;
-    object = new Type();
-    object.__proto__ = prototype;
-  }
-  if (typeof properties !== 'undefined' && Object.defineProperties) {
-    Object.defineProperties(object, properties);
-  }
-  return object;
-}
-exports.create = typeof Object.create === 'function' ? Object.create : create;
-
-// Object.keys and Object.getOwnPropertyNames is supported in IE9 however
-// they do show a description and number property on Error objects
-function notObject(object) {
-  return ((typeof object != "object" && typeof object != "function") || object === null);
-}
-
-function keysShim(object) {
-  if (notObject(object)) {
-    throw new TypeError("Object.keys called on a non-object");
-  }
-
-  var result = [];
-  for (var name in object) {
-    if (hasOwnProperty.call(object, name)) {
-      result.push(name);
-    }
-  }
-  return result;
-}
-
-// getOwnPropertyNames is almost the same as Object.keys one key feature
-//  is that it returns hidden properties, since that can't be implemented,
-//  this feature gets reduced so it just shows the length property on arrays
-function propertyShim(object) {
-  if (notObject(object)) {
-    throw new TypeError("Object.getOwnPropertyNames called on a non-object");
-  }
-
-  var result = keysShim(object);
-  if (exports.isArray(object) && exports.indexOf(object, 'length') === -1) {
-    result.push('length');
-  }
-  return result;
-}
-
-var keys = typeof Object.keys === 'function' ? Object.keys : keysShim;
-var getOwnPropertyNames = typeof Object.getOwnPropertyNames === 'function' ?
-  Object.getOwnPropertyNames : propertyShim;
-
-if (new Error().hasOwnProperty('description')) {
-  var ERROR_PROPERTY_FILTER = function (obj, array) {
-    if (toString.call(obj) === '[object Error]') {
-      array = exports.filter(array, function (name) {
-        return name !== 'description' && name !== 'number' && name !== 'message';
-      });
-    }
-    return array;
-  };
-
-  exports.keys = function (object) {
-    return ERROR_PROPERTY_FILTER(object, keys(object));
-  };
-  exports.getOwnPropertyNames = function (object) {
-    return ERROR_PROPERTY_FILTER(object, getOwnPropertyNames(object));
-  };
-} else {
-  exports.keys = keys;
-  exports.getOwnPropertyNames = getOwnPropertyNames;
-}
-
-// Object.getOwnPropertyDescriptor - supported in IE8 but only on dom elements
-function valueObject(value, key) {
-  return { value: value[key] };
-}
-
-if (typeof Object.getOwnPropertyDescriptor === 'function') {
-  try {
-    Object.getOwnPropertyDescriptor({'a': 1}, 'a');
-    exports.getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
-  } catch (e) {
-    // IE8 dom element issue - use a try catch and default to valueObject
-    exports.getOwnPropertyDescriptor = function (value, key) {
-      try {
-        return Object.getOwnPropertyDescriptor(value, key);
-      } catch (e) {
-        return valueObject(value, key);
-      }
-    };
-  }
-} else {
-  exports.getOwnPropertyDescriptor = valueObject;
-}
-
-},{}],14:[function(require,module,exports){
-
-// not implemented
-// The reason for having an empty file and not throwing is to allow
-// untraditional implementation of this module.
-
-},{}],15:[function(require,module,exports){
-var process=require("__browserify_process");// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-var util = require('util');
-var shims = require('_shims');
-
-// resolves . and .. elements in a path array with directory names there
-// must be no slashes, empty elements, or device names (c:\) in the array
-// (so also no leading and trailing slashes - it does not distinguish
-// relative and absolute paths)
-function normalizeArray(parts, allowAboveRoot) {
-  // if the path tries to go above the root, `up` ends up > 0
-  var up = 0;
-  for (var i = parts.length - 1; i >= 0; i--) {
-    var last = parts[i];
-    if (last === '.') {
-      parts.splice(i, 1);
-    } else if (last === '..') {
-      parts.splice(i, 1);
-      up++;
-    } else if (up) {
-      parts.splice(i, 1);
-      up--;
-    }
-  }
-
-  // if the path is allowed to go above the root, restore leading ..s
-  if (allowAboveRoot) {
-    for (; up--; up) {
-      parts.unshift('..');
-    }
-  }
-
-  return parts;
-}
-
-// Split a filename into [root, dir, basename, ext], unix version
-// 'root' is just a slash, or nothing.
-var splitPathRe =
-    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
-var splitPath = function(filename) {
-  return splitPathRe.exec(filename).slice(1);
-};
-
-// path.resolve([from ...], to)
-// posix version
-exports.resolve = function() {
-  var resolvedPath = '',
-      resolvedAbsolute = false;
-
-  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
-    var path = (i >= 0) ? arguments[i] : process.cwd();
-
-    // Skip empty and invalid entries
-    if (!util.isString(path)) {
-      throw new TypeError('Arguments to path.resolve must be strings');
-    } else if (!path) {
-      continue;
-    }
-
-    resolvedPath = path + '/' + resolvedPath;
-    resolvedAbsolute = path.charAt(0) === '/';
-  }
-
-  // At this point the path should be resolved to a full absolute path, but
-  // handle relative paths to be safe (might happen when process.cwd() fails)
-
-  // Normalize the path
-  resolvedPath = normalizeArray(shims.filter(resolvedPath.split('/'), function(p) {
-    return !!p;
-  }), !resolvedAbsolute).join('/');
-
-  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
-};
-
-// path.normalize(path)
-// posix version
-exports.normalize = function(path) {
-  var isAbsolute = exports.isAbsolute(path),
-      trailingSlash = shims.substr(path, -1) === '/';
-
-  // Normalize the path
-  path = normalizeArray(shims.filter(path.split('/'), function(p) {
-    return !!p;
-  }), !isAbsolute).join('/');
-
-  if (!path && !isAbsolute) {
-    path = '.';
-  }
-  if (path && trailingSlash) {
-    path += '/';
-  }
-
-  return (isAbsolute ? '/' : '') + path;
-};
-
-// posix version
-exports.isAbsolute = function(path) {
-  return path.charAt(0) === '/';
-};
-
-// posix version
-exports.join = function() {
-  var paths = Array.prototype.slice.call(arguments, 0);
-  return exports.normalize(shims.filter(paths, function(p, index) {
-    if (!util.isString(p)) {
-      throw new TypeError('Arguments to path.join must be strings');
-    }
-    return p;
-  }).join('/'));
-};
-
-
-// path.relative(from, to)
-// posix version
-exports.relative = function(from, to) {
-  from = exports.resolve(from).substr(1);
-  to = exports.resolve(to).substr(1);
-
-  function trim(arr) {
-    var start = 0;
-    for (; start < arr.length; start++) {
-      if (arr[start] !== '') break;
-    }
-
-    var end = arr.length - 1;
-    for (; end >= 0; end--) {
-      if (arr[end] !== '') break;
-    }
-
-    if (start > end) return [];
-    return arr.slice(start, end - start + 1);
-  }
-
-  var fromParts = trim(from.split('/'));
-  var toParts = trim(to.split('/'));
-
-  var length = Math.min(fromParts.length, toParts.length);
-  var samePartsLength = length;
-  for (var i = 0; i < length; i++) {
-    if (fromParts[i] !== toParts[i]) {
-      samePartsLength = i;
-      break;
-    }
-  }
-
-  var outputParts = [];
-  for (var i = samePartsLength; i < fromParts.length; i++) {
-    outputParts.push('..');
-  }
-
-  outputParts = outputParts.concat(toParts.slice(samePartsLength));
-
-  return outputParts.join('/');
-};
-
-exports.sep = '/';
-exports.delimiter = ':';
-
-exports.dirname = function(path) {
-  var result = splitPath(path),
-      root = result[0],
-      dir = result[1];
-
-  if (!root && !dir) {
-    // No dirname whatsoever
-    return '.';
-  }
-
-  if (dir) {
-    // It has a dirname, strip trailing slash
-    dir = dir.substr(0, dir.length - 1);
-  }
-
-  return root + dir;
-};
-
-
-exports.basename = function(path, ext) {
-  var f = splitPath(path)[2];
-  // TODO: make this comparison case-insensitive on windows?
-  if (ext && f.substr(-1 * ext.length) === ext) {
-    f = f.substr(0, f.length - ext.length);
-  }
-  return f;
-};
-
-
-exports.extname = function(path) {
-  return splitPath(path)[3];
-};
-
-},{"__browserify_process":17,"_shims":13,"util":16}],16:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-var shims = require('_shims');
-
-var formatRegExp = /%[sdj%]/g;
-exports.format = function(f) {
-  if (!isString(f)) {
-    var objects = [];
-    for (var i = 0; i < arguments.length; i++) {
-      objects.push(inspect(arguments[i]));
-    }
-    return objects.join(' ');
-  }
-
-  var i = 1;
-  var args = arguments;
-  var len = args.length;
-  var str = String(f).replace(formatRegExp, function(x) {
-    if (x === '%%') return '%';
-    if (i >= len) return x;
-    switch (x) {
-      case '%s': return String(args[i++]);
-      case '%d': return Number(args[i++]);
-      case '%j':
-        try {
-          return JSON.stringify(args[i++]);
-        } catch (_) {
-          return '[Circular]';
-        }
-      default:
-        return x;
-    }
-  });
-  for (var x = args[i]; i < len; x = args[++i]) {
-    if (isNull(x) || !isObject(x)) {
-      str += ' ' + x;
-    } else {
-      str += ' ' + inspect(x);
-    }
-  }
-  return str;
-};
-
-/**
- * Echos the value of a value. Trys to print the value out
- * in the best way possible given the different types.
- *
- * @param {Object} obj The object to print out.
- * @param {Object} opts Optional options object that alters the output.
- */
-/* legacy: obj, showHidden, depth, colors*/
-function inspect(obj, opts) {
-  // default options
-  var ctx = {
-    seen: [],
-    stylize: stylizeNoColor
-  };
-  // legacy...
-  if (arguments.length >= 3) ctx.depth = arguments[2];
-  if (arguments.length >= 4) ctx.colors = arguments[3];
-  if (isBoolean(opts)) {
-    // legacy...
-    ctx.showHidden = opts;
-  } else if (opts) {
-    // got an "options" object
-    exports._extend(ctx, opts);
-  }
-  // set default options
-  if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
-  if (isUndefined(ctx.depth)) ctx.depth = 2;
-  if (isUndefined(ctx.colors)) ctx.colors = false;
-  if (isUndefined(ctx.customInspect)) ctx.customInspect = true;
-  if (ctx.colors) ctx.stylize = stylizeWithColor;
-  return formatValue(ctx, obj, ctx.depth);
-}
-exports.inspect = inspect;
-
-
-// http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
-inspect.colors = {
-  'bold' : [1, 22],
-  'italic' : [3, 23],
-  'underline' : [4, 24],
-  'inverse' : [7, 27],
-  'white' : [37, 39],
-  'grey' : [90, 39],
-  'black' : [30, 39],
-  'blue' : [34, 39],
-  'cyan' : [36, 39],
-  'green' : [32, 39],
-  'magenta' : [35, 39],
-  'red' : [31, 39],
-  'yellow' : [33, 39]
-};
-
-// Don't use 'blue' not visible on cmd.exe
-inspect.styles = {
-  'special': 'cyan',
-  'number': 'yellow',
-  'boolean': 'yellow',
-  'undefined': 'grey',
-  'null': 'bold',
-  'string': 'green',
-  'date': 'magenta',
-  // "name": intentionally not styling
-  'regexp': 'red'
-};
-
-
-function stylizeWithColor(str, styleType) {
-  var style = inspect.styles[styleType];
-
-  if (style) {
-    return '\u001b[' + inspect.colors[style][0] + 'm' + str +
-           '\u001b[' + inspect.colors[style][1] + 'm';
-  } else {
-    return str;
-  }
-}
-
-
-function stylizeNoColor(str, styleType) {
-  return str;
-}
-
-
-function arrayToHash(array) {
-  var hash = {};
-
-  shims.forEach(array, function(val, idx) {
-    hash[val] = true;
-  });
-
-  return hash;
-}
-
-
-function formatValue(ctx, value, recurseTimes) {
-  // Provide a hook for user-specified inspect functions.
-  // Check that value is an object with an inspect function on it
-  if (ctx.customInspect &&
-      value &&
-      isFunction(value.inspect) &&
-      // Filter out the util module, it's inspect function is special
-      value.inspect !== exports.inspect &&
-      // Also filter out any prototype objects using the circular check.
-      !(value.constructor && value.constructor.prototype === value)) {
-    var ret = value.inspect(recurseTimes);
-    if (!isString(ret)) {
-      ret = formatValue(ctx, ret, recurseTimes);
-    }
-    return ret;
-  }
-
-  // Primitive types cannot have properties
-  var primitive = formatPrimitive(ctx, value);
-  if (primitive) {
-    return primitive;
-  }
-
-  // Look up the keys of the object.
-  var keys = shims.keys(value);
-  var visibleKeys = arrayToHash(keys);
-
-  if (ctx.showHidden) {
-    keys = shims.getOwnPropertyNames(value);
-  }
-
-  // Some type of object without properties can be shortcutted.
-  if (keys.length === 0) {
-    if (isFunction(value)) {
-      var name = value.name ? ': ' + value.name : '';
-      return ctx.stylize('[Function' + name + ']', 'special');
-    }
-    if (isRegExp(value)) {
-      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
-    }
-    if (isDate(value)) {
-      return ctx.stylize(Date.prototype.toString.call(value), 'date');
-    }
-    if (isError(value)) {
-      return formatError(value);
-    }
-  }
-
-  var base = '', array = false, braces = ['{', '}'];
-
-  // Make Array say that they are Array
-  if (isArray(value)) {
-    array = true;
-    braces = ['[', ']'];
-  }
-
-  // Make functions say that they are functions
-  if (isFunction(value)) {
-    var n = value.name ? ': ' + value.name : '';
-    base = ' [Function' + n + ']';
-  }
-
-  // Make RegExps say that they are RegExps
-  if (isRegExp(value)) {
-    base = ' ' + RegExp.prototype.toString.call(value);
-  }
-
-  // Make dates with properties first say the date
-  if (isDate(value)) {
-    base = ' ' + Date.prototype.toUTCString.call(value);
-  }
-
-  // Make error with message first say the error
-  if (isError(value)) {
-    base = ' ' + formatError(value);
-  }
-
-  if (keys.length === 0 && (!array || value.length == 0)) {
-    return braces[0] + base + braces[1];
-  }
-
-  if (recurseTimes < 0) {
-    if (isRegExp(value)) {
-      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
-    } else {
-      return ctx.stylize('[Object]', 'special');
-    }
-  }
-
-  ctx.seen.push(value);
-
-  var output;
-  if (array) {
-    output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
-  } else {
-    output = keys.map(function(key) {
-      return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
-    });
-  }
-
-  ctx.seen.pop();
-
-  return reduceToSingleString(output, base, braces);
-}
-
-
-function formatPrimitive(ctx, value) {
-  if (isUndefined(value))
-    return ctx.stylize('undefined', 'undefined');
-  if (isString(value)) {
-    var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
-                                             .replace(/'/g, "\\'")
-                                             .replace(/\\"/g, '"') + '\'';
-    return ctx.stylize(simple, 'string');
-  }
-  if (isNumber(value))
-    return ctx.stylize('' + value, 'number');
-  if (isBoolean(value))
-    return ctx.stylize('' + value, 'boolean');
-  // For some reason typeof null is "object", so special case here.
-  if (isNull(value))
-    return ctx.stylize('null', 'null');
-}
-
-
-function formatError(value) {
-  return '[' + Error.prototype.toString.call(value) + ']';
-}
-
-
-function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
-  var output = [];
-  for (var i = 0, l = value.length; i < l; ++i) {
-    if (hasOwnProperty(value, String(i))) {
-      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
-          String(i), true));
-    } else {
-      output.push('');
-    }
-  }
-
-  shims.forEach(keys, function(key) {
-    if (!key.match(/^\d+$/)) {
-      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
-          key, true));
-    }
-  });
-  return output;
-}
-
-
-function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
-  var name, str, desc;
-  desc = shims.getOwnPropertyDescriptor(value, key) || { value: value[key] };
-  if (desc.get) {
-    if (desc.set) {
-      str = ctx.stylize('[Getter/Setter]', 'special');
-    } else {
-      str = ctx.stylize('[Getter]', 'special');
-    }
-  } else {
-    if (desc.set) {
-      str = ctx.stylize('[Setter]', 'special');
-    }
-  }
-
-  if (!hasOwnProperty(visibleKeys, key)) {
-    name = '[' + key + ']';
-  }
-  if (!str) {
-    if (shims.indexOf(ctx.seen, desc.value) < 0) {
-      if (isNull(recurseTimes)) {
-        str = formatValue(ctx, desc.value, null);
-      } else {
-        str = formatValue(ctx, desc.value, recurseTimes - 1);
-      }
-      if (str.indexOf('\n') > -1) {
-        if (array) {
-          str = str.split('\n').map(function(line) {
-            return '  ' + line;
-          }).join('\n').substr(2);
-        } else {
-          str = '\n' + str.split('\n').map(function(line) {
-            return '   ' + line;
-          }).join('\n');
-        }
-      }
-    } else {
-      str = ctx.stylize('[Circular]', 'special');
-    }
-  }
-  if (isUndefined(name)) {
-    if (array && key.match(/^\d+$/)) {
-      return str;
-    }
-    name = JSON.stringify('' + key);
-    if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
-      name = name.substr(1, name.length - 2);
-      name = ctx.stylize(name, 'name');
-    } else {
-      name = name.replace(/'/g, "\\'")
-                 .replace(/\\"/g, '"')
-                 .replace(/(^"|"$)/g, "'");
-      name = ctx.stylize(name, 'string');
-    }
-  }
-
-  return name + ': ' + str;
-}
-
-
-function reduceToSingleString(output, base, braces) {
-  var numLinesEst = 0;
-  var length = shims.reduce(output, function(prev, cur) {
-    numLinesEst++;
-    if (cur.indexOf('\n') >= 0) numLinesEst++;
-    return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
-  }, 0);
-
-  if (length > 60) {
-    return braces[0] +
-           (base === '' ? '' : base + '\n ') +
-           ' ' +
-           output.join(',\n  ') +
-           ' ' +
-           braces[1];
-  }
-
-  return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
-}
-
-
-// NOTE: These type checking functions intentionally don't use `instanceof`
-// because it is fragile and can be easily faked with `Object.create()`.
-function isArray(ar) {
-  return shims.isArray(ar);
-}
-exports.isArray = isArray;
-
-function isBoolean(arg) {
-  return typeof arg === 'boolean';
-}
-exports.isBoolean = isBoolean;
-
-function isNull(arg) {
-  return arg === null;
-}
-exports.isNull = isNull;
-
-function isNullOrUndefined(arg) {
-  return arg == null;
-}
-exports.isNullOrUndefined = isNullOrUndefined;
-
-function isNumber(arg) {
-  return typeof arg === 'number';
-}
-exports.isNumber = isNumber;
-
-function isString(arg) {
-  return typeof arg === 'string';
-}
-exports.isString = isString;
-
-function isSymbol(arg) {
-  return typeof arg === 'symbol';
-}
-exports.isSymbol = isSymbol;
-
-function isUndefined(arg) {
-  return arg === void 0;
-}
-exports.isUndefined = isUndefined;
-
-function isRegExp(re) {
-  return isObject(re) && objectToString(re) === '[object RegExp]';
-}
-exports.isRegExp = isRegExp;
-
-function isObject(arg) {
-  return typeof arg === 'object' && arg;
-}
-exports.isObject = isObject;
-
-function isDate(d) {
-  return isObject(d) && objectToString(d) === '[object Date]';
-}
-exports.isDate = isDate;
-
-function isError(e) {
-  return isObject(e) && objectToString(e) === '[object Error]';
-}
-exports.isError = isError;
-
-function isFunction(arg) {
-  return typeof arg === 'function';
-}
-exports.isFunction = isFunction;
-
-function isPrimitive(arg) {
-  return arg === null ||
-         typeof arg === 'boolean' ||
-         typeof arg === 'number' ||
-         typeof arg === 'string' ||
-         typeof arg === 'symbol' ||  // ES6 symbol
-         typeof arg === 'undefined';
-}
-exports.isPrimitive = isPrimitive;
-
-function isBuffer(arg) {
-  return arg && typeof arg === 'object'
-    && typeof arg.copy === 'function'
-    && typeof arg.fill === 'function'
-    && typeof arg.binarySlice === 'function'
-  ;
-}
-exports.isBuffer = isBuffer;
-
-function objectToString(o) {
-  return Object.prototype.toString.call(o);
-}
-
-
-function pad(n) {
-  return n < 10 ? '0' + n.toString(10) : n.toString(10);
-}
-
-
-var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
-              'Oct', 'Nov', 'Dec'];
-
-// 26 Feb 16:19:34
-function timestamp() {
-  var d = new Date();
-  var time = [pad(d.getHours()),
-              pad(d.getMinutes()),
-              pad(d.getSeconds())].join(':');
-  return [d.getDate(), months[d.getMonth()], time].join(' ');
-}
-
-
-// log is just a thin wrapper to console.log that prepends a timestamp
-exports.log = function() {
-  console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
-};
-
-
-/**
- * Inherit the prototype methods from one constructor into another.
- *
- * The Function.prototype.inherits from lang.js rewritten as a standalone
- * function (not on Function.prototype). NOTE: If this file is to be loaded
- * during bootstrapping this function needs to be rewritten using some native
- * functions as prototype setup using normal JavaScript does not work as
- * expected during bootstrapping (see mirror.js in r114903).
- *
- * @param {function} ctor Constructor function which needs to inherit the
- *     prototype.
- * @param {function} superCtor Constructor function to inherit prototype from.
- */
-exports.inherits = function(ctor, superCtor) {
-  ctor.super_ = superCtor;
-  ctor.prototype = shims.create(superCtor.prototype, {
-    constructor: {
-      value: ctor,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-};
-
-exports._extend = function(origin, add) {
-  // Don't do anything if add isn't an object
-  if (!add || !isObject(add)) return origin;
-
-  var keys = shims.keys(add);
-  var i = keys.length;
-  while (i--) {
-    origin[keys[i]] = add[keys[i]];
-  }
-  return origin;
-};
-
-function hasOwnProperty(obj, prop) {
-  return Object.prototype.hasOwnProperty.call(obj, prop);
-}
-
-},{"_shims":13}],17:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -2028,7 +1002,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],18:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var promise = require('lie');
 function qMap(arr,func){
     var len = arr.length;
@@ -2136,7 +1110,7 @@ promise.denodify = function(func) {
     };
 };
 module.exports = promise;
-},{"lie":19}],19:[function(require,module,exports){
+},{"lie":15}],15:[function(require,module,exports){
 var immediate = require('immediate');
 // Creates a deferred: an object with a promise and corresponding resolve/reject methods
 function Promise(resolver) {
@@ -2253,9 +1227,9 @@ function execute(callback, value, resolve, reject) {
 }
 module.exports = Promise;
 
-},{"immediate":21}],20:[function(require,module,exports){
+},{"immediate":17}],16:[function(require,module,exports){
 var global=typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};module.exports = typeof global === "object" && global ? global : this;
-},{}],21:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 "use strict";
 var types = [
     require("./nextTick"),
@@ -2306,7 +1280,7 @@ retFunc.clear = function (n) {
 };
 module.exports = retFunc;
 
-},{"./messageChannel":22,"./mutation":23,"./nextTick":24,"./postMessage":25,"./realSetImmediate":26,"./stateChange":27,"./timeout":28}],22:[function(require,module,exports){
+},{"./messageChannel":18,"./mutation":19,"./nextTick":20,"./postMessage":21,"./realSetImmediate":22,"./stateChange":23,"./timeout":24}],18:[function(require,module,exports){
 "use strict";
 var globe = require("./global");
 exports.test = function () {
@@ -2320,7 +1294,7 @@ exports.install = function (func) {
         channel.port2.postMessage(0);
     };
 };
-},{"./global":20}],23:[function(require,module,exports){
+},{"./global":16}],19:[function(require,module,exports){
 "use strict";
 //based off rsvp
 //https://github.com/tildeio/rsvp.js/blob/master/lib/rsvp/async.js
@@ -2346,7 +1320,7 @@ exports.install = function (handle) {
         element.setAttribute("drainQueue", "drainQueue");
     };
 };
-},{"./global":20}],24:[function(require,module,exports){
+},{"./global":16}],20:[function(require,module,exports){
 var process=require("__browserify_process");"use strict";
 exports.test = function () {
     // Don't get fooled by e.g. browserify environments.
@@ -2356,7 +1330,7 @@ exports.test = function () {
 exports.install = function () {
     return process.nextTick;
 };
-},{"__browserify_process":17}],25:[function(require,module,exports){
+},{"__browserify_process":13}],21:[function(require,module,exports){
 "use strict";
 var globe = require("./global");
 exports.test = function () {
@@ -2394,7 +1368,7 @@ exports.install = function (func) {
         globe.postMessage(codeWord, "*");
     };
 };
-},{"./global":20}],26:[function(require,module,exports){
+},{"./global":16}],22:[function(require,module,exports){
 "use strict";
 var globe = require("./global");
 exports.test = function () {
@@ -2406,7 +1380,7 @@ exports.install = function (handle) {
     return globe.setTimeout.bind(globe,handle,0);
 };
 
-},{"./global":20}],27:[function(require,module,exports){
+},{"./global":16}],23:[function(require,module,exports){
 "use strict";
 var globe = require("./global");
 exports.test = function () {
@@ -2431,7 +1405,7 @@ exports.install = function (handle) {
         return handle;
     };
 };
-},{"./global":20}],28:[function(require,module,exports){
+},{"./global":16}],24:[function(require,module,exports){
 "use strict";
 exports.test = function () {
     return true;
@@ -2442,7 +1416,7 @@ exports.install = function (t) {
         setTimeout(t, 0);
     };
 };
-},{}],29:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /*
  Copyright 2013 Daniel Wirtz <dcode@dcode.io>
  Copyright 2009 The Closure Library Authors. All Rights Reserved.
@@ -3378,7 +2352,7 @@ exports.install = function (t) {
 
 })(this);
 
-},{}],30:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var mgrs = require('./mgrs');
 
 function Point(x, y, z) {
@@ -3441,7 +2415,7 @@ Point.prototype.toMGRS = function(accuracy) {
   }, accuracy);
 };
 module.exports = Point;
-},{"./mgrs":46}],31:[function(require,module,exports){
+},{"./mgrs":42}],27:[function(require,module,exports){
 var extend = require('./extend');
 var common = require('./common');
 var defs = require('./defs');
@@ -3576,7 +2550,7 @@ Projection.prototype = {
 };
 module.exports = Projection;
 
-},{"./common":33,"./constants/index":38,"./datum":40,"./defs":42,"./extend":43,"./projString":47,"./projections/index":56,"./wkt":76}],32:[function(require,module,exports){
+},{"./common":29,"./constants/index":34,"./datum":36,"./defs":38,"./extend":39,"./projString":43,"./projections/index":52,"./wkt":72}],28:[function(require,module,exports){
 module.exports = function(crs, denorm, point) {
   var xin = point.x,
     yin = point.y,
@@ -3629,7 +2603,7 @@ module.exports = function(crs, denorm, point) {
   return point;
 };
 
-},{}],33:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 exports.PI = 3.141592653589793238; //Math.PI;
 exports.HALF_PI = 1.570796326794896619; //Math.PI*0.5;
 exports.TWO_PI = 6.283185307179586477; //Math.PI*2;
@@ -4096,7 +3070,7 @@ exports.C66 = 0.36458333333333333333;
 exports.C68 = 0.00569661458333333333;
 exports.C88 = 0.3076171875;
 
-},{}],34:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 exports.wgs84 = {
   towgs84: "0,0,0",
   ellipse: "WGS84",
@@ -4172,7 +3146,7 @@ exports.gunung_segara = {
   ellipse: 'bessel',
   datumName: 'Gunung Segara Jakarta'
 };
-},{}],35:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 exports.MERIT = {
   a: 6378137.0,
   rf: 298.257,
@@ -4388,7 +3362,7 @@ exports.sphere = {
   b: 6370997.0,
   ellipseName: "Normal Sphere (r=6370997)"
 };
-},{}],36:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 exports.greenwich = 0.0; //"0dE",
 exports.lisbon = -9.131906111111; //"9d07'54.862\"W",
 exports.paris = 2.337229166667; //"2d20'14.025\"E",
@@ -4402,7 +3376,7 @@ exports.brussels = 4.367975; //"4d22'4.71\"E",
 exports.stockholm = 18.058277777778; //"18d3'29.8\"E",
 exports.athens = 23.7163375; //"23d42'58.815\"E",
 exports.oslo = 10.722916666667; //"10d43'22.5\"E"
-},{}],37:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 // Based on . CTABLE  structure :
   // FIXME: better to have array instead of object holding longitudes, latitudes members
   //        In the former case, one has to document index 0 is longitude and
@@ -4426,7 +3400,7 @@ exports.null = { // name of grid's file
     [0.0, 0.0] // }
   ]
 };
-},{}],38:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 exports.PrimeMeridian = require('./PrimeMeridian');
 
 exports.Ellipsoid = require('./Ellipsoid');
@@ -4438,7 +3412,7 @@ exports.Datum.OSB36 = exports.Datum.OSGB36; //as returned from spatialreference.
 
 exports.grids = require('./grids');
 
-},{"./Datum":34,"./Ellipsoid":35,"./PrimeMeridian":36,"./grids":37}],39:[function(require,module,exports){
+},{"./Datum":30,"./Ellipsoid":31,"./PrimeMeridian":32,"./grids":33}],35:[function(require,module,exports){
 var point = require('./Point');
 var proj = require('./Proj');
 var transform = require('./transform');
@@ -4504,7 +3478,7 @@ function proj4(fromProj, toProj, coord) {
   }
 }
 module.exports = proj4;
-},{"./Point":30,"./Proj":31,"./transform":74}],40:[function(require,module,exports){
+},{"./Point":26,"./Proj":27,"./transform":70}],36:[function(require,module,exports){
 var common = require('./common');
 var datum = function(proj) {
   if (!(this instanceof datum)) {
@@ -4902,7 +3876,7 @@ datum.prototype = {
 */
 module.exports = datum;
 
-},{"./common":33}],41:[function(require,module,exports){
+},{"./common":29}],37:[function(require,module,exports){
 var common = require('./common');
 module.exports = function(source, dest, point) {
   var wp, i, l;
@@ -4998,7 +3972,7 @@ module.exports = function(source, dest, point) {
 };
 
 
-},{"./common":33}],42:[function(require,module,exports){
+},{"./common":29}],38:[function(require,module,exports){
 var globals = require('./global');
 var parseProj = require('./projString');
 var wkt = require('./wkt');
@@ -5048,7 +4022,7 @@ function defs(name) {
 globals(defs);
 module.exports = defs;
 
-},{"./global":44,"./projString":47,"./wkt":76}],43:[function(require,module,exports){
+},{"./global":40,"./projString":43,"./wkt":72}],39:[function(require,module,exports){
 module.exports = function(destination, source) {
   destination = destination || {};
   var value, property;
@@ -5064,7 +4038,7 @@ module.exports = function(destination, source) {
   return destination;
 };
 
-},{}],44:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 module.exports = function(defs) {
   defs('WGS84', "+title=WGS 84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees");
   defs('EPSG:4326', "+title=WGS 84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees");
@@ -5077,7 +4051,7 @@ module.exports = function(defs) {
   defs['EPSG:102113'] = defs['EPSG:3857'];
 };
 
-},{}],45:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 var proj4 = require('./core');
 proj4.defaultDatum = 'WGS84'; //default datum
 proj4.Proj = require('./Proj');
@@ -5088,7 +4062,7 @@ proj4.transform = require('./transform');
 proj4.mgrs = require('./mgrs');
 proj4.version = require('./version');
 module.exports = proj4;
-},{"./Point":30,"./Proj":31,"./core":39,"./defs":42,"./mgrs":46,"./transform":74,"./version":75}],46:[function(require,module,exports){
+},{"./Point":26,"./Proj":27,"./core":35,"./defs":38,"./mgrs":42,"./transform":70,"./version":71}],42:[function(require,module,exports){
 /*
 Portions of this software are based on a port of components from the OpenMap
 com.bbn.openmap.proj.coords Java package. An initial port was initially created
@@ -5978,7 +4952,7 @@ function getMinNorthing(zoneLetter) {
 
 }
 
-},{}],47:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 var common = require('./common');
 var constants = require('./constants/index');
 module.exports = function(defData) {
@@ -6096,7 +5070,7 @@ module.exports = function(defData) {
   return self;
 };
 
-},{"./common":33,"./constants/index":38}],48:[function(require,module,exports){
+},{"./common":29,"./constants/index":34}],44:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
 
@@ -6215,7 +5189,7 @@ exports.phi1z = function(eccent, qs) {
 };
 exports.names = ["Albers_Conic_Equal_Area", "Albers", "aea"];
 
-},{"../common":33}],49:[function(require,module,exports){
+},{"../common":29}],45:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
   this.sin_p12 = Math.sin(this.lat0);
@@ -6404,7 +5378,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Azimuthal_Equidistant", "aeqd"];
 
-},{"../common":33}],50:[function(require,module,exports){
+},{"../common":29}],46:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
   if (!this.sphere) {
@@ -6498,7 +5472,7 @@ exports.inverse = function(p) {
 
 };
 exports.names = ["Cassini", "Cassini_Soldner", "cass"];
-},{"../common":33}],51:[function(require,module,exports){
+},{"../common":29}],47:[function(require,module,exports){
 var common = require('../common');
 /*
   reference:  
@@ -6560,7 +5534,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["cea"];
 
-},{"../common":33}],52:[function(require,module,exports){
+},{"../common":29}],48:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
 
@@ -6602,7 +5576,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Equirectangular", "Equidistant_Cylindrical", "eqc"];
 
-},{"../common":33}],53:[function(require,module,exports){
+},{"../common":29}],49:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
 
@@ -6706,7 +5680,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Equidistant_Conic", "eqdc"];
 
-},{"../common":33}],54:[function(require,module,exports){
+},{"../common":29}],50:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
   var sphi = Math.sin(this.lat0);
@@ -6750,7 +5724,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["gauss"];
 
-},{"../common":33}],55:[function(require,module,exports){
+},{"../common":29}],51:[function(require,module,exports){
 var common = require('../common');
 /*
   reference:
@@ -6848,7 +5822,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["gnom"];
 
-},{"../common":33}],56:[function(require,module,exports){
+},{"../common":29}],52:[function(require,module,exports){
 var projs = [
   require('./tmerc'),
   require('./utm'),
@@ -6906,7 +5880,7 @@ exports.start = function() {
   projs.forEach(add);
 };
 
-},{"./aea":48,"./aeqd":49,"./cass":50,"./cea":51,"./eqc":52,"./eqdc":53,"./gnom":55,"./krovak":57,"./laea":58,"./lcc":59,"./longlat":60,"./merc":61,"./mill":62,"./moll":63,"./nzmg":64,"./omerc":65,"./poly":66,"./sinu":67,"./somerc":68,"./stere":69,"./sterea":70,"./tmerc":71,"./utm":72,"./vandg":73}],57:[function(require,module,exports){
+},{"./aea":44,"./aeqd":45,"./cass":46,"./cea":47,"./eqc":48,"./eqdc":49,"./gnom":51,"./krovak":53,"./laea":54,"./lcc":55,"./longlat":56,"./merc":57,"./mill":58,"./moll":59,"./nzmg":60,"./omerc":61,"./poly":62,"./sinu":63,"./somerc":64,"./stere":65,"./sterea":66,"./tmerc":67,"./utm":68,"./vandg":69}],53:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
   this.a = 6377397.155;
@@ -7006,7 +5980,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Krovak", "krovak"];
 
-},{"../common":33}],58:[function(require,module,exports){
+},{"../common":29}],54:[function(require,module,exports){
 var common = require('../common');
 /*
   reference
@@ -7292,7 +6266,7 @@ exports.authlat = function(beta, APA) {
 };
 exports.names = ["Lambert Azimuthal Equal Area", "Lambert_Azimuthal_Equal_Area", "laea"];
 
-},{"../common":33}],59:[function(require,module,exports){
+},{"../common":29}],55:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
 
@@ -7422,7 +6396,7 @@ exports.inverse = function(p) {
 
 exports.names = ["Lambert Tangential Conformal Conic Projection", "Lambert_Conformal_Conic", "Lambert_Conformal_Conic_2SP", "lcc"];
 
-},{"../common":33}],60:[function(require,module,exports){
+},{"../common":29}],56:[function(require,module,exports){
 exports.init = function() {
   //no-op for longlat
 };
@@ -7434,7 +6408,7 @@ exports.forward = identity;
 exports.inverse = identity;
 exports.names = ["longlat", "identity"];
 
-},{}],61:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
   var con = this.b / this.a;
@@ -7520,7 +6494,7 @@ exports.inverse = function(p) {
 
 exports.names = ["Mercator", "Popular Visualisation Pseudo Mercator", "Mercator_1SP", "Mercator_Auxiliary_Sphere", "merc"];
 
-},{"../common":33}],62:[function(require,module,exports){
+},{"../common":29}],58:[function(require,module,exports){
 var common = require('../common');
 /*
   reference
@@ -7567,7 +6541,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Miller_Cylindrical", "mill"];
 
-},{"../common":33}],63:[function(require,module,exports){
+},{"../common":29}],59:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {};
 
@@ -7645,7 +6619,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Mollweide", "moll"];
 
-},{"../common":33}],64:[function(require,module,exports){
+},{"../common":29}],60:[function(require,module,exports){
 var common = require('../common');
 /*
   reference
@@ -7865,7 +6839,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["New_Zealand_Map_Grid", "nzmg"];
-},{"../common":33}],65:[function(require,module,exports){
+},{"../common":29}],61:[function(require,module,exports){
 var common = require('../common');
 
 
@@ -8030,7 +7004,7 @@ exports.inverse = function(p) {
 };
 
 exports.names = ["Hotine_Oblique_Mercator", "Hotine Oblique Mercator", "Hotine_Oblique_Mercator_Azimuth_Natural_Origin", "Hotine_Oblique_Mercator_Azimuth_Center", "omerc"];
-},{"../common":33}],66:[function(require,module,exports){
+},{"../common":29}],62:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
   /* Place parameters in static storage for common use
@@ -8150,7 +7124,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["Polyconic", "poly"];
-},{"../common":33}],67:[function(require,module,exports){
+},{"../common":29}],63:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
   /* Place parameters in static storage for common use
@@ -8249,7 +7223,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["Sinusoidal", "sinu"];
-},{"../common":33}],68:[function(require,module,exports){
+},{"../common":29}],64:[function(require,module,exports){
 /*
   references:
     Formules et constantes pour le Calcul pour la
@@ -8331,7 +7305,7 @@ exports.inverse = function(p) {
 
 exports.names = ["somerc"];
 
-},{}],69:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 var common = require('../common');
 exports.ssfn_ = function(phit, sinphi, eccen) {
   sinphi *= eccen;
@@ -8492,7 +7466,7 @@ exports.inverse = function(p) {
 
 };
 exports.names = ["stere"];
-},{"../common":33}],70:[function(require,module,exports){
+},{"../common":29}],66:[function(require,module,exports){
 var common = require('../common');
 var gauss = require('./gauss');
 exports.init = function() {
@@ -8551,7 +7525,7 @@ exports.inverse = function(p) {
 
 exports.names = ["Stereographic_North_Pole", "Oblique_Stereographic", "Polar_Stereographic", "sterea","Oblique Stereographic Alternative"];
 
-},{"../common":33,"./gauss":54}],71:[function(require,module,exports){
+},{"../common":29,"./gauss":50}],67:[function(require,module,exports){
 var common = require('../common');
 exports.init = function() {
   this.e0 = common.e0fn(this.es);
@@ -8678,7 +7652,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Transverse_Mercator", "Transverse Mercator", "tmerc"];
 
-},{"../common":33}],72:[function(require,module,exports){
+},{"../common":29}],68:[function(require,module,exports){
 var common = require('../common');
 var tmerc = require('./tmerc');
 exports.dependsOn = 'tmerc';
@@ -8698,7 +7672,7 @@ exports.init = function() {
 };
 exports.names = ["Universal Transverse Mercator System", "utm"];
 
-},{"../common":33,"./tmerc":71}],73:[function(require,module,exports){
+},{"../common":29,"./tmerc":67}],69:[function(require,module,exports){
 var common = require('../common');
 
 /* Initialize the Van Der Grinten projection
@@ -8817,7 +7791,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["Van_der_Grinten_I", "VanDerGrinten", "vandg"];
-},{"../common":33}],74:[function(require,module,exports){
+},{"../common":29}],70:[function(require,module,exports){
 var common = require('./common');
 var datum_transform = require('./datum_transform');
 var adjust_axis = require('./adjust_axis');
@@ -8884,9 +7858,9 @@ module.exports = function transform(source, dest, point) {
 
   return point;
 };
-},{"./Proj":31,"./adjust_axis":32,"./common":33,"./datum_transform":41}],75:[function(require,module,exports){
+},{"./Proj":27,"./adjust_axis":28,"./common":29,"./datum_transform":37}],71:[function(require,module,exports){
 module.exports = '1.5.0-dev.4';
-},{}],76:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 var common = require('./common');
 var extend = require('./extend');
 
@@ -9094,7 +8068,7 @@ module.exports = function(wkt, self) {
   return extend(self, obj.output);
 };
 
-},{"./common":33,"./extend":43}]},{},[6])
-(6)
+},{"./common":29,"./extend":39}]},{},[7])
+(7)
 });
 ;
