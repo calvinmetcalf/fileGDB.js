@@ -7,12 +7,20 @@ module.exports = function(grunt) {
 					'dist/<%= pkg.name %>.js': ['lib/index.js']
 				},
 				options: {
-					standalone: '<%= pkg.name %>'
+					standalone: '<%= pkg.name %>',
+					alias: [
+						'./lib/browserReader.js:./nodeReader'
+						]
 				}
 			},
 			site: {
 				files: {
 					'site/bundle.js': ['site/script.js']
+				},
+				options: {
+					alias: [
+						'./lib/browserReader.js:./nodeReader'
+						]
 				}
 			}
 		},
