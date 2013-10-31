@@ -20,5 +20,12 @@ function testIt(gdbPath){
 	});
 }
 ['./test/aul.gdb','./test/GRP.gdb','./test/multipointtest.gdb','./test/bostonferry.gdb','./test/innerRing.gdb','./test/fuel.gdb'].map(testIt);
+describe('zip test',function(){
+	it('should work',function(done){
+		fs.readFile('./test/aul.zip',function(err,data){
+			done(assert(fdb(data),true));
+		});
+	});
+});
 //uncoment if your sure you have enough memory
 //testIt('./test/BikeInventory.gdb');
