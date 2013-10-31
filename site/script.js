@@ -3,12 +3,26 @@ var m = require('./mapSetup')(L);
 var fgdb = require('../lib/index');
 var colorbrewer = require('./colorbrewer');
 var fileInput = document.getElementById("upload");
+var dirInput = document.getElementById("uploadDir");
 fileInput.addEventListener("change", function() {
-	fgdb(fileInput.files).then(function(layers){
+	var file = fileInput.files[0];
+	var reader = new FileReader();
+		reader.onload = function() {
+			
+	
+	var layers = fgdb(reader.result);
 		for(var key in layers){
 			lc.addOverlay(L.geoJson(layers[key], option).addTo(m),key);
 		}
-	});
+		};
+		reader.readAsArrayBuffer(file);
+});
+dirInput.addEventListener("change", function() {
+        fgdb(dirInput.files).then(function(layers){
+                for(var key in layers){
+                        lc.addOverlay(L.geoJson(layers[key], option).addTo(m),key);
+                }
+        });
 });
 var lc = L.control.layers({},{},{collapsed:false}).addTo(m);
 function color(s){
@@ -44,11 +58,18 @@ var option = {
 function addFunction() {
 	var div = L.DomUtil.create('form', 'bgroup');
 	div.id = "dropzone";
-	var doneButton = L.DomUtil.create('button', "btn  btn-primary span2", div);
+	var bgroup = L.DomUtil.create('div','btn-group',div);
+	var doneButton = L.DomUtil.create('button', "btn  btn-primary span2", bgroup);
 	doneButton.type = "button";
-	doneButton.innerHTML = "select a .GDB folder";
+	doneButton.innerHTML = "select a zipped .GDB";
 	L.DomEvent.addListener(doneButton, "click", function() {
 		fileInput.click();
+	});
+	var dirButton = L.DomUtil.create('button', "btn  btn-primary span2", bgroup);
+	dirButton.type = "button";
+	dirButton.innerHTML = "select a .GDB folder";
+	L.DomEvent.addListener(dirButton, "click", function() {
+		dirInput.click();
 	});
 	return div;
 }
