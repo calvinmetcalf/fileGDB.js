@@ -59,13 +59,13 @@ function addFunction() {
 	var div = L.DomUtil.create('form', 'bgroup');
 	div.id = "dropzone";
 	var bgroup = L.DomUtil.create('div','btn-group',div);
-	var doneButton = L.DomUtil.create('button', "btn  btn-primary span2", bgroup);
+	var doneButton = L.DomUtil.create('button', "btn  btn-primary span3", bgroup);
 	doneButton.type = "button";
 	doneButton.innerHTML = "select a zipped .GDB";
 	L.DomEvent.addListener(doneButton, "click", function() {
 		fileInput.click();
 	});
-	var dirButton = L.DomUtil.create('button', "btn  btn-primary span2", bgroup);
+	var dirButton = L.DomUtil.create('button', "btn  btn-primary span3", bgroup);
 	dirButton.type = "button";
 	dirButton.innerHTML = "upload the files in a .GDB folder";
 	L.DomEvent.addListener(dirButton, "click", function() {

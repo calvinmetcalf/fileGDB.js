@@ -1,6 +1,6 @@
 {
   "name": "fgdb",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "parsing an esri file GDB IN JAVASCRIPT!",
   "main": "lib/index.js",
   "scripts": {
