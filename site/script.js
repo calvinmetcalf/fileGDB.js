@@ -67,7 +67,7 @@ function addFunction() {
 	});
 	var dirButton = L.DomUtil.create('button', "btn  btn-primary span2", bgroup);
 	dirButton.type = "button";
-	dirButton.innerHTML = "select a .GDB folder";
+	dirButton.innerHTML = "upload the files in a .GDB folder";
 	L.DomEvent.addListener(dirButton, "click", function() {
 		dirInput.click();
 	});
