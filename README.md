@@ -6,26 +6,26 @@ Produces valid geojson with coordinates converted to wgs84.
 
 build with `grunt`, build the site with `grunt site`
 
-pass it either 2 buffers one for the .table and the other for the .tablx files OR
-in node pass it the path to a file gdb and it will return a promise for an object whose keys are names and the values are geojson ie
+all ways of calling it return the same thing, an object with keys being feature class names and values being geojson.
+
+either give it a path, in node to a .gdb folder or in the browser to a zipped .gdb file.
 
 ```javascript
 var fgdb = require('fgdb');
-fgdb('path/to/something.gdb').then(function(objectOfGeojson){
+fgdb('path/to/something.gdb(.zip)').then(function(objectOfGeojson){
 	//do something
 },function(error){
 	//do something else
 });
 ```
 
-in the broser you can do something similar but with the results for a FileList, 
-ie with this HTML
+in the browser you can also just pass a fileList aka from something like this:
 
 ```html
 <input id="upload" class="upStuff" type='file' webkitdirectory directory multiple></input>
 ```
 
-then you can have this javascript
+which in chrome they can select a folder, or in other browsers they can select all the files inside the folder.
 
 ```javascript
 document.getElementById("upload").addEventListener("change", function() {
@@ -37,9 +37,11 @@ document.getElementById("upload").addEventListener("change", function() {
 });
 ```
 
+Both the browser and node will accept a buffer (node Buffer or ArrayBuffer) for a zipped .gdb, that simply returns the object.
+
 todo:
 - ~~Figure out how feature names are stored in the database~~
-- zipped files
+- ~~zipped files~~
 - Faster
 - put it in a web worker or maybe in multiple web workers
 - ~~Promises, promises can fit in here somehow~~
