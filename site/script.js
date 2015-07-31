@@ -8,12 +8,13 @@ fileInput.addEventListener("change", function() {
 	var file = fileInput.files[0];
 	var reader = new FileReader();
 		reader.onload = function() {
-			
-	
-	var layers = fgdb(reader.result);
-		for(var key in layers){
-			lc.addOverlay(L.geoJson(layers[key], option).addTo(m),key);
-		}
+
+
+	  fgdb(reader.result).then(function(layers){
+			for(var key in layers){
+				lc.addOverlay(L.geoJson(layers[key], option).addTo(m),key);
+			}
+		});
 		};
 		reader.readAsArrayBuffer(file);
 });

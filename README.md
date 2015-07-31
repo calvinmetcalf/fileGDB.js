@@ -4,7 +4,7 @@ Implementing [this amazing reverse engineering](https://github.com/rouault/dump_
 
 Produces valid geojson with coordinates converted to wgs84.
 
-build with `grunt`, build the site with `grunt site`
+build with `npm run build`, build the site with `npm run site`
 
 all ways of calling it return the same thing, an object with keys being feature class names and values being geojson.
 
