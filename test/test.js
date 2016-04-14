@@ -21,7 +21,9 @@ function testIt(gdbPath){
     });
   });
 }
-['./test/aul.gdb', './test/GRP.gdb', './test/multipointtest.gdb', './test/bostonferry.gdb', './test/innerRing.gdb', './test/fuel.gdb'].map(testIt);
+
+['./test/aul.gdb', './test/GRP.gdb', './test/multipointtest.gdb', './test/bostonferry.gdb', './test/innerRing.gdb', './test/fuel.gdb', './test/pdx_nullable_shape_and_default_value.gdb'].map(testIt);
+
 describe('zip test', function(){
   it('should work', function(done){
     fs.readFile('./test/aul.zip', function(err, data){
